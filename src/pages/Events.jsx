@@ -11,6 +11,7 @@ const Events = () => {
     const [qrEvent, setQrEvent] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
+        category: '',
         description: '',
         location: '',
         event_date: '',
@@ -57,6 +58,7 @@ const Events = () => {
             setEditingEvent(event);
             setFormData({
                 title: event.title,
+                category: event.category || '',
                 description: event.description || '',
                 location: event.location || '',
                 event_date: event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '',
@@ -70,6 +72,7 @@ const Events = () => {
             setEditingEvent(null);
             setFormData({
                 title: '',
+                category: '',
                 description: '',
                 location: '',
                 event_date: '',
@@ -102,6 +105,7 @@ const Events = () => {
         // Format payload
         const payload = {
             ...formData,
+            category: formData.category ? formData.category.trim() : null,
             event_date: new Date(formData.event_date).toISOString(),
             capacity: formData.capacity > 0 ? formData.capacity : null
         };
@@ -155,6 +159,7 @@ const Events = () => {
                             <thead className="bg-[#111] text-gray-400 border-b border-input">
                                 <tr>
                                     <th className="px-6 py-4 font-medium">Event Name</th>
+                                    <th className="px-6 py-4 font-medium">Category</th>
                                     <th className="px-6 py-4 font-medium">Date & Location</th>
                                     <th className="px-6 py-4 font-medium">Award Points</th>
                                     <th className="px-6 py-4 font-medium">RSVPs</th>
@@ -179,6 +184,15 @@ const Events = () => {
                                                     <p className="text-gray-400 text-xs mt-0.5 truncate max-w-[200px]">{event.description}</p>
                                                 </div>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {event.category ? (
+                                                <span className="px-2.5 py-1 rounded-md text-xs bg-gold/10 border border-gold/20 text-gold font-medium">
+                                                    {event.category}
+                                                </span>
+                                            ) : (
+                                                <span className="text-gray-500 text-xs">—</span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             <p className="text-gray-300">{new Date(event.event_date).toLocaleString()}</p>
@@ -253,7 +267,7 @@ const Events = () => {
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2 md:col-span-2">
+                                <div className="space-y-2">
                                     <label className="text-sm font-medium text-gray-300">Event Title</label>
                                     <input
                                         required
@@ -263,6 +277,25 @@ const Events = () => {
                                         onChange={handleInputChange}
                                         className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
                                     />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-300">Category (Optional)</label>
+                                    <select
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleInputChange}
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    >
+                                        <option value="">-- None / Select Category (Optional) --</option>
+                                        <option value="Gala & Dining">Gala & Dining</option>
+                                        <option value="Networking">Networking</option>
+                                        <option value="Real Estate">Real Estate</option>
+                                        <option value="Exclusives">Exclusives</option>
+                                        <option value="VIP">VIP</option>
+                                        <option value="Workshop">Workshop</option>
+                                        <option value="Other">Other</option>
+                                    </select>
                                 </div>
 
                                 <div className="space-y-2 md:col-span-2">
