@@ -20,7 +20,7 @@ const Users = () => {
     const { data: activeUsers = [], isLoading: isLoadingActive } = useQuery({
         queryKey: ['adminUsers'],
         queryFn: async () => {
-            const res = await api.get('/admin/users');
+            const res = await api.get('/api/v1/admin/users');
             return res.data;
         }
     });
@@ -29,7 +29,7 @@ const Users = () => {
     const { data: deletedUsers = [], isLoading: isLoadingDeleted } = useQuery({
         queryKey: ['adminDeletedUsers'],
         queryFn: async () => {
-            const res = await api.get('/admin/deleted-users');
+            const res = await api.get('/api/v1/admin/deleted-users');
             return res.data;
         }
     });
@@ -37,7 +37,7 @@ const Users = () => {
     // Mutation: Edit Points
     const updatePointsMutation = useMutation({
         mutationFn: async ({ id, newPoints, reason }) => {
-            const res = await api.put(`/admin/users/${id}/points`, {
+            const res = await api.put(`/api/v1/admin/users/${id}/points`, {
                 new_points: Number(newPoints),
                 reason
             });
@@ -53,7 +53,7 @@ const Users = () => {
     // Mutation: Delete User (Soft Delete)
     const deleteUserMutation = useMutation({
         mutationFn: async (id) => {
-            const res = await api.delete(`/admin/users/${id}`);
+            const res = await api.delete(`/api/v1/admin/users/${id}`);
             return res.data;
         },
         onSuccess: () => {
@@ -66,7 +66,7 @@ const Users = () => {
     // Mutation: Restore User
     const restoreUserMutation = useMutation({
         mutationFn: async (id) => {
-            const res = await api.post(`/admin/users/${id}/restore`);
+            const res = await api.post(`/api/v1/admin/users/${id}/restore`);
             return res.data;
         },
         onSuccess: () => {
