@@ -8,6 +8,8 @@ import Rewards from './pages/Rewards';
 import Redemptions from './pages/Redemptions';
 import Transactions from './pages/Transactions';
 import Login from './pages/Login';
+import Support from './pages/Support';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import Sidebar from './components/Sidebar';
 
 const ProtectedRoute = ({ children, session }) => {
@@ -47,6 +49,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
 
         <Route path="/" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute session={session}><Users /></ProtectedRoute>} />

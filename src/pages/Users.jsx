@@ -158,7 +158,8 @@ const Users = () => {
                                 <tr>
                                     <th className="px-6 py-4 font-medium">Name</th>
                                     <th className="px-6 py-4 font-medium">Email</th>
-                                    <th className="px-6 py-4 font-medium">Mobile</th>
+                                    <th className="px-6 py-4 font-medium">Gender</th>
+                                    <th className="px-6 py-4 font-medium">Occupancy</th>
                                     <th className="px-6 py-4 font-medium">Joined</th>
                                     <th className="px-6 py-4 font-medium">Reward Points</th>
                                     {activeTab === 'deleted' && <th className="px-6 py-4 font-medium">Deleted On</th>}
@@ -171,7 +172,20 @@ const Users = () => {
                                     <tr key={user.id} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 text-white font-medium">{user.full_name}</td>
                                         <td className="px-6 py-4 text-gray-400">{user.email}</td>
-                                        <td className="px-6 py-4 text-gray-400">{user.mobile || '—'}</td>
+                                        <td className="px-6 py-4 text-gray-300">
+                                            {user.gender ? (
+                                                <span className="px-2.5 py-1 rounded-md text-xs bg-white/5 border border-white/10 text-gray-300">
+                                                    {user.gender}
+                                                </span>
+                                            ) : '—'}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-300">
+                                            {user.home_ownership || user.occupancy ? (
+                                                <span className="px-2.5 py-1 rounded-md text-xs bg-gold/10 border border-gold/20 text-gold font-medium">
+                                                    {user.home_ownership || user.occupancy}
+                                                </span>
+                                            ) : '—'}
+                                        </td>
                                         <td className="px-6 py-4 text-gray-400">
                                             {user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}
                                         </td>
