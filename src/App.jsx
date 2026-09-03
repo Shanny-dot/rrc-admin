@@ -10,6 +10,7 @@ import Transactions from './pages/Transactions';
 import Login from './pages/Login';
 import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import Sidebar from './components/Sidebar';
 
 const ProtectedRoute = ({ children, session }) => {
@@ -51,6 +52,7 @@ function App() {
         <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
         <Route path="/support" element={<Support />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
 
         <Route path="/" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute session={session}><Users /></ProtectedRoute>} />
