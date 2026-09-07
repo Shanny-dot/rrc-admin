@@ -44,7 +44,7 @@ const Transactions = () => {
                             <thead className="bg-[#111] text-gray-400 border-b border-input">
                                 <tr>
                                     <th className="px-6 py-4 font-medium">Date</th>
-                                    <th className="px-6 py-4 font-medium">User ID</th>
+                                    <th className="px-6 py-4 font-medium">User</th>
                                     <th className="px-6 py-4 font-medium">Type</th>
                                     <th className="px-6 py-4 font-medium">Description</th>
                                     <th className="px-6 py-4 font-medium text-right">Points</th>
@@ -54,7 +54,10 @@ const Transactions = () => {
                                 {transactions.map((tx) => (
                                     <tr key={tx.id} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 text-gray-400">{new Date(tx.created_at).toLocaleString()}</td>
-                                        <td className="px-6 py-4 text-white font-medium">{tx.user_id.substring(0, 8)}...</td>
+                                        <td className="px-6 py-4">
+                                            <p className="text-white font-medium">{tx.users?.full_name || 'Member'}</p>
+                                            <p className="text-gray-500 text-xs mt-0.5">{tx.users?.email || tx.user_id}</p>
+                                        </td>
                                         <td className="px-6 py-4">
                                             <span className="capitalize text-gray-300">{tx.type.replace('_', ' ')}</span>
                                         </td>

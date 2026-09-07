@@ -170,7 +170,13 @@ const Users = () => {
                             <tbody className="divide-y divide-input">
                                 {filteredUsers.map((user) => (
                                     <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4 text-white font-medium">{user.full_name}</td>
+                                        <td className="px-6 py-4 text-white font-medium">
+                                            {user.full_name && user.full_name !== user.email
+                                                ? user.full_name
+                                                : user.email
+                                                    ? user.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                                                    : 'Member'}
+                                        </td>
                                         <td className="px-6 py-4 text-gray-400">{user.email}</td>
                                         <td className="px-6 py-4 text-gray-300">
                                             {user.gender ? (

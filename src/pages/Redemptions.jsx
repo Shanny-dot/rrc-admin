@@ -70,7 +70,13 @@ const Redemptions = () => {
                                     <tr key={req.id} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 text-gray-400">{new Date(req.requested_at).toLocaleDateString()}</td>
                                         <td className="px-6 py-4">
-                                            <p className="text-white font-medium">{req.users?.full_name}</p>
+                                            <p className="text-white font-medium">
+                                                {req.users?.full_name && req.users.full_name !== req.users?.email
+                                                    ? req.users.full_name
+                                                    : req.users?.email
+                                                        ? req.users.email.split('@')[0].replace(/[._]/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                                                        : 'Member'}
+                                            </p>
                                             <p className="text-gray-500 text-xs mt-0.5">{req.users?.email}</p>
                                         </td>
                                         <td className="px-6 py-4 text-white font-medium">{req.rewards?.title}</td>
