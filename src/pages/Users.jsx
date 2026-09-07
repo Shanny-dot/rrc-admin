@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check } from 'lucide-react';
+import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check, Eye } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
@@ -15,6 +15,9 @@ const Users = () => {
     
     const [deletingUser, setDeletingUser] = useState(null); // user object to delete
     const [restoringUser, setRestoringUser] = useState(null); // user object to restore
+    const [viewingUser, setViewingUser] = useState(null);   // user object for detail drawer
+    const [drawerForm, setDrawerForm] = useState({});       // editable copy of user fields
+    const [drawerDirty, setDrawerDirty] = useState(false);
 
     // Fetch Active Users
     const { data: activeUsers = [], isLoading: isLoadingActive } = useQuery({
@@ -75,6 +78,32 @@ const Users = () => {
             setRestoringUser(null);
         }
     });
+
+    // Mutation: Save user profile from drawer
+    const saveProfileMutation = useMutation({
+        mutationFn: async ({ id, data }) => {
+            const res = await api.put(`/api/v1/admin/users/${id}`, data);
+            return res.data;
+        },
+        onSuccess: (updated) => {
+            queryClient.invalidateQueries(['adminUsers']);
+            // update viewing user with fresh data
+            setViewingUser(updated);
+            setDrawerForm(updated);
+            setDrawerDirty(false);
+        }
+    });
+
+    const openDrawer = (user) => {
+        setViewingUser(user);
+        setDrawerForm({ ...user });
+        setDrawerDirty(false);
+    };
+
+    const handleDrawerChange = (field, value) => {
+        setDrawerForm(prev => ({ ...prev, [field]: value }));
+        setDrawerDirty(true);
+    };
 
     const currentList = activeTab === 'active' ? activeUsers : deletedUsers;
     const isLoading = activeTab === 'active' ? isLoadingActive : isLoadingDeleted;
@@ -235,6 +264,13 @@ const Users = () => {
                                             {activeTab === 'active' ? (
                                                 <div className="flex justify-end gap-2">
                                                     <button
+                                                        onClick={() => openDrawer(user)}
+                                                        className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                                        title="View / Edit Details"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                    <button
                                                         onClick={() => openEditPoints(user)}
                                                         className="px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-gold text-xs font-semibold rounded-lg transition-colors border border-gold/30"
                                                     >
@@ -389,6 +425,204 @@ const Users = () => {
                         </div>
                     </div>
                 </div>
+            )}
+            {/* DRAWER: USER DETAIL VIEW/EDIT */}
+            {viewingUser && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+                        onClick={() => setViewingUser(null)}
+                    />
+                    {/* Panel */}
+                    <div className="fixed right-0 top-0 h-full w-full max-w-xl bg-surface border-l border-input z-50 overflow-y-auto shadow-2xl flex flex-col">
+                        {/* Header */}
+                        <div className="flex items-center justify-between px-6 py-5 border-b border-input sticky top-0 bg-surface z-10">
+                            <div>
+                                <h2 className="text-xl font-bold text-white">
+                                    {drawerForm.full_name && drawerForm.full_name !== drawerForm.email
+                                        ? drawerForm.full_name
+                                        : drawerForm.email?.split('@')[0] || 'Member'}
+                                </h2>
+                                <p className="text-gray-400 text-sm mt-0.5">{drawerForm.email}</p>
+                            </div>
+                            <button onClick={() => setViewingUser(null)} className="text-gray-400 hover:text-white p-1 rounded-lg transition-colors">
+                                <X size={22} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-6 space-y-6 flex-1">
+
+                            {/* Identity */}
+                            <section>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Identity</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Full Name</label>
+                                        <input
+                                            value={drawerForm.full_name || ''}
+                                            onChange={e => handleDrawerChange('full_name', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Mobile</label>
+                                        <input
+                                            value={drawerForm.mobile || ''}
+                                            onChange={e => handleDrawerChange('mobile', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Date of Birth</label>
+                                        <input
+                                            value={drawerForm.dob || ''}
+                                            onChange={e => handleDrawerChange('dob', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                            placeholder="YYYY-MM-DD"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Gender</label>
+                                        <select
+                                            value={drawerForm.gender || ''}
+                                            onChange={e => handleDrawerChange('gender', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        >
+                                            <option value="">— Select —</option>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Non-binary">Non-binary</option>
+                                            <option value="Prefer not to say">Prefer not to say</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Professional */}
+                            <section>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Professional</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Industry</label>
+                                        <input
+                                            value={drawerForm.industry || ''}
+                                            onChange={e => handleDrawerChange('industry', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Home Ownership</label>
+                                        <select
+                                            value={drawerForm.home_ownership_status || drawerForm.home_ownership || ''}
+                                            onChange={e => handleDrawerChange('home_ownership_status', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        >
+                                            <option value="">— Select —</option>
+                                            <option value="Owner">Owner</option>
+                                            <option value="Renter">Renter</option>
+                                            <option value="Living with family">Living with family</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-400 block mb-1">Annual Income</label>
+                                        <input
+                                            value={drawerForm.annual_income || ''}
+                                            onChange={e => handleDrawerChange('annual_income', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                            placeholder="e.g. $80,000 – $100,000"
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Address */}
+                            <section>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Address</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="col-span-2">
+                                        <label className="text-xs text-gray-400 block mb-1">Street Address</label>
+                                        <input
+                                            value={drawerForm.street_address || ''}
+                                            onChange={e => handleDrawerChange('street_address', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">City</label>
+                                        <input
+                                            value={drawerForm.city || ''}
+                                            onChange={e => handleDrawerChange('city', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">State</label>
+                                        <input
+                                            value={drawerForm.state || ''}
+                                            onChange={e => handleDrawerChange('state', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-gray-400 block mb-1">Post Code</label>
+                                        <input
+                                            value={drawerForm.postal_code || ''}
+                                            onChange={e => handleDrawerChange('postal_code', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Account Info (read-only) */}
+                            <section>
+                                <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Account Info</h3>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {[
+                                        { label: 'Total Points', value: `${viewingUser.total_points || 0} pts` },
+                                        { label: 'Referral Code', value: viewingUser.referral_code || '—' },
+                                        { label: 'Joined', value: viewingUser.created_at ? new Date(viewingUser.created_at).toLocaleDateString() : '—' },
+                                        { label: 'Role', value: viewingUser.is_admin ? 'Admin' : 'Member' },
+                                    ].map(({ label, value }) => (
+                                        <div key={label} className="bg-input rounded-lg px-3 py-2">
+                                            <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+                                            <p className="text-white text-sm font-medium">{value}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="px-6 py-4 border-t border-input sticky bottom-0 bg-surface flex justify-between items-center gap-3">
+                            {saveProfileMutation.isError && (
+                                <p className="text-red-400 text-xs">Save failed. Please try again.</p>
+                            )}
+                            {saveProfileMutation.isSuccess && !drawerDirty && (
+                                <p className="text-green-400 text-xs flex items-center gap-1"><Check size={14} /> Saved</p>
+                            )}
+                            {!saveProfileMutation.isError && !(saveProfileMutation.isSuccess && !drawerDirty) && <span />}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setViewingUser(null)}
+                                    className="px-4 py-2 rounded-lg bg-input hover:bg-[#333] text-gray-300 text-sm font-medium transition-colors"
+                                >
+                                    Close
+                                </button>
+                                <button
+                                    onClick={() => saveProfileMutation.mutate({ id: viewingUser.id, data: drawerForm })}
+                                    disabled={!drawerDirty || saveProfileMutation.isPending}
+                                    className="px-5 py-2 rounded-lg bg-gold hover:bg-gold/90 text-black text-sm font-bold transition-colors disabled:opacity-40"
+                                >
+                                    {saveProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Calendar, Gift, CheckCircle, List, LogOut } from 'lucide-react';
+import { Home, Users, Calendar, Gift, CheckCircle, List, LogOut, FileText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Sidebar = () => {
@@ -13,6 +13,7 @@ const Sidebar = () => {
         { name: 'Rewards', path: '/rewards', icon: Gift },
         { name: 'Redemptions', path: '/redemptions', icon: CheckCircle },
         { name: 'Transactions', path: '/transactions', icon: List },
+        { name: 'Content', path: '/content', icon: FileText },
     ];
 
     return (
