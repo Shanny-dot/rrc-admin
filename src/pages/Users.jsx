@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check, Eye } from 'lucide-react';
+import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check, Eye, PlusCircle, MinusCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
@@ -8,10 +8,11 @@ const Users = () => {
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'deleted'
     const [searchQuery, setSearchQuery] = useState('');
     
-    // Modal states
-    const [editingUser, setEditingUser] = useState(null); // { id, full_name, total_points }
-    const [newPoints, setNewPoints] = useState(0);
-    const [editReason, setEditReason] = useState('Admin manual adjustment');
+    // Points edit modal state
+    const [editingUser, setEditingUser] = useState(null);
+    const [pointsMode, setPointsMode] = useState('add');   // 'add' | 'deduct'
+    const [pointsAmount, setPointsAmount] = useState('');  // relative amount to add/deduct
+    const [pointsNote, setPointsNote] = useState('');      // free-text notes
     
     const [deletingUser, setDeletingUser] = useState(null); // user object to delete
     const [restoringUser, setRestoringUser] = useState(null); // user object to restore
@@ -119,8 +120,9 @@ const Users = () => {
 
     const openEditPoints = (user) => {
         setEditingUser(user);
-        setNewPoints(user.total_points || 0);
-        setEditReason('Admin adjustment');
+        setPointsMode('add');
+        setPointsAmount('');
+        setPointsNote('');
     };
 
     return (
@@ -303,66 +305,171 @@ const Users = () => {
                 </div>
             </div>
 
-            {/* MODAL: EDIT REWARD POINTS */}
-            {editingUser && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-surface border border-input rounded-2xl p-6 w-full max-w-md shadow-2xl">
-                        <div className="flex justify-between items-center pb-4 mb-4 border-b border-input">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <Edit3 className="text-gold" size={20} /> Edit Reward Points
-                            </h3>
-                            <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-white">
-                                <X size={20} />
-                            </button>
-                        </div>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-sm text-gray-400 mb-1">User Account:</p>
-                                <p className="text-white font-medium text-lg">{editingUser.full_name}</p>
-                                <p className="text-gray-500 text-xs">{editingUser.email}</p>
+            {/* MODAL: EDIT REWARD POINTS — Add / Deduct */}
+            {editingUser && (() => {
+                const current = editingUser.total_points || 0;
+                const amt = parseInt(pointsAmount, 10) || 0;
+                const newTotal = pointsMode === 'add' ? current + amt : Math.max(0, current - amt);
+                const canSave = amt > 0 && pointsNote.trim().length > 0;
+
+                return (
+                    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <div className="bg-surface border border-input rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+
+                            {/* Header */}
+                            <div className="flex justify-between items-center px-6 py-5 border-b border-input">
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    <Edit3 className="text-gold" size={20} /> Adjust Points
+                                </h3>
+                                <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-white transition-colors">
+                                    <X size={20} />
+                                </button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">New Total Points Balance</label>
-                                <input
-                                    type="number"
-                                    value={newPoints}
-                                    onChange={(e) => setNewPoints(e.target.value)}
-                                    className="w-full bg-input border border-[#444] rounded-lg px-4 py-2.5 text-gold font-bold text-xl focus:outline-none focus:border-gold"
-                                />
+
+                            <div className="px-6 py-5 space-y-5">
+                                {/* User identity */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-white font-semibold">
+                                            {editingUser.full_name && editingUser.full_name !== editingUser.email
+                                                ? editingUser.full_name
+                                                : editingUser.email?.split('@')[0]}
+                                        </p>
+                                        <p className="text-gray-500 text-xs mt-0.5">{editingUser.email}</p>
+                                    </div>
+                                    {/* Current balance badge */}
+                                    <div className="text-right">
+                                        <p className="text-xs text-gray-500 mb-0.5">Current Balance</p>
+                                        <p className="text-2xl font-bold text-gold">{current.toLocaleString()} <span className="text-sm font-medium">pts</span></p>
+                                    </div>
+                                </div>
+
+                                {/* Add / Deduct tabs */}
+                                <div className="flex bg-[#111] rounded-xl p-1 gap-1">
+                                    <button
+                                        onClick={() => { setPointsMode('add'); setPointsAmount(''); }}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                            pointsMode === 'add'
+                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                                                : 'text-gray-500 hover:text-gray-300'
+                                        }`}
+                                    >
+                                        <PlusCircle size={16} /> Add Points
+                                    </button>
+                                    <button
+                                        onClick={() => { setPointsMode('deduct'); setPointsAmount(''); }}
+                                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                                            pointsMode === 'deduct'
+                                                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                                : 'text-gray-500 hover:text-gray-300'
+                                        }`}
+                                    >
+                                        <MinusCircle size={16} /> Deduct Points
+                                    </button>
+                                </div>
+
+                                {/* Amount input */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        {pointsMode === 'add' ? 'Points to Add' : 'Points to Deduct'}
+                                    </label>
+                                    <div className="relative">
+                                        <span className={`absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold ${
+                                            pointsMode === 'add' ? 'text-green-400' : 'text-red-400'
+                                        }`}>
+                                            {pointsMode === 'add' ? '+' : '−'}
+                                        </span>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={pointsAmount}
+                                            onChange={e => setPointsAmount(e.target.value.replace(/[^0-9]/g, ''))}
+                                            placeholder="0"
+                                            autoFocus
+                                            className={`w-full bg-input border rounded-xl pl-10 pr-4 py-3 font-bold text-2xl focus:outline-none transition-colors ${
+                                                pointsMode === 'add'
+                                                    ? 'border-green-500/30 text-green-400 focus:border-green-400'
+                                                    : 'border-red-500/30 text-red-400 focus:border-red-400'
+                                            }`}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Live new balance preview */}
+                                <div className={`flex items-center justify-between rounded-xl px-4 py-3 border ${
+                                    amt === 0 ? 'bg-[#111] border-[#333]' :
+                                    pointsMode === 'add' ? 'bg-green-500/5 border-green-500/20' : 'bg-red-500/5 border-red-500/20'
+                                }`}>
+                                    <div className="text-sm text-gray-400">
+                                        <span className="text-white font-medium">{current.toLocaleString()}</span>
+                                        <span className="mx-2">{pointsMode === 'add' ? '+' : '−'}</span>
+                                        <span className={pointsMode === 'add' ? 'text-green-400' : 'text-red-400'}>
+                                            {amt > 0 ? amt.toLocaleString() : '?'}
+                                        </span>
+                                        <span className="mx-2 text-gray-600">=</span>
+                                        <span className={`font-bold text-base ${pointsMode === 'add' ? 'text-green-400' : 'text-red-400'}`}>
+                                            {amt > 0 ? newTotal.toLocaleString() : '—'} pts
+                                        </span>
+                                    </div>
+                                    <span className="text-xs text-gray-500">New balance</span>
+                                </div>
+
+                                {/* Notes — live editable */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                        Notes <span className="text-red-400">*</span>
+                                        <span className="text-gray-600 font-normal ml-1">(required)</span>
+                                    </label>
+                                    <textarea
+                                        rows={3}
+                                        value={pointsNote}
+                                        onChange={e => setPointsNote(e.target.value)}
+                                        placeholder={pointsMode === 'add'
+                                            ? "e.g. Manual award for attending community event on 5 Sep…"
+                                            : "e.g. Deducted due to returned reward claim…"}
+                                        className="w-full bg-input border border-[#444] rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold transition-colors resize-none leading-relaxed"
+                                    />
+                                    <p className="text-xs text-gray-600 mt-1">{pointsNote.length} characters</p>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-1">Reason / Note</label>
-                                <input
-                                    type="text"
-                                    value={editReason}
-                                    onChange={(e) => setEditReason(e.target.value)}
-                                    className="w-full bg-input border border-[#444] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-gold"
-                                    placeholder="Reason for adjustment"
-                                />
+
+                            {/* Footer */}
+                            <div className="px-6 py-4 border-t border-input flex justify-between items-center">
+                                {!canSave && (
+                                    <p className="text-xs text-gray-600">
+                                        {amt === 0 ? 'Enter an amount' : 'Notes required'}
+                                    </p>
+                                )}
+                                {canSave && <span />}
+                                <div className="flex gap-3 ml-auto">
+                                    <button
+                                        onClick={() => setEditingUser(null)}
+                                        className="px-4 py-2 rounded-lg bg-input hover:bg-[#333] text-gray-300 text-sm font-medium transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => updatePointsMutation.mutate({
+                                            id: editingUser.id,
+                                            newPoints: newTotal,
+                                            reason: `[${pointsMode === 'add' ? '+' : '-'}${amt} pts] ${pointsNote.trim()}`
+                                        })}
+                                        disabled={!canSave || updatePointsMutation.isPending}
+                                        className={`px-5 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-40 ${
+                                            pointsMode === 'add'
+                                                ? 'bg-green-500 hover:bg-green-400 text-white'
+                                                : 'bg-red-500 hover:bg-red-400 text-white'
+                                        }`}
+                                    >
+                                        {updatePointsMutation.isPending ? 'Saving...' :
+                                            pointsMode === 'add' ? `Add ${amt > 0 ? amt.toLocaleString() : ''} Points` : `Deduct ${amt > 0 ? amt.toLocaleString() : ''} Points`}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-input">
-                            <button
-                                onClick={() => setEditingUser(null)}
-                                className="px-4 py-2 rounded-lg bg-input hover:bg-[#333] text-gray-300 text-sm font-medium transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={() => updatePointsMutation.mutate({
-                                    id: editingUser.id,
-                                    newPoints,
-                                    reason: editReason
-                                })}
-                                disabled={updatePointsMutation.isPending}
-                                className="px-5 py-2 rounded-lg bg-gold hover:bg-gold-light text-black text-sm font-bold transition-colors disabled:opacity-50"
-                            >
-                                {updatePointsMutation.isPending ? 'Saving...' : 'Save Points'}
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* MODAL: DELETE USER CONFIRMATION */}
             {deletingUser && (
