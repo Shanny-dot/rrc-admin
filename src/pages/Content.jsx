@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Edit3, Check, X, RefreshCw, AlertCircle, ToggleLeft, ToggleRight } from 'lucide-react';
+import { FileText, Edit3, Check, X, RefreshCw, ToggleLeft, ToggleRight } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
@@ -81,16 +81,11 @@ const Content = () => {
 
     return (
         <div className="max-w-5xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Content Management</h1>
-                    <p className="text-gray-400 mt-1">Edit app text and copy — changes go live instantly on next app refresh</p>
-                </div>
-                <div className="flex items-center gap-2 bg-gold/10 border border-gold/20 rounded-xl px-4 py-2">
-                    <AlertCircle size={16} className="text-gold" />
-                    <span className="text-gold text-sm font-medium">Changes are live instantly</span>
-                </div>
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-white tracking-tight">Content Management</h1>
+                <p className="text-gray-400 mt-1">Edit app text and copy — changes go live instantly on next app refresh</p>
             </div>
+
 
             {isLoading ? (
                 <div className="text-center text-gray-400 py-20">
