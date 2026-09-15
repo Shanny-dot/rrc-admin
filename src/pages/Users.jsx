@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check, Eye, PlusCircle, MinusCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
@@ -21,22 +21,34 @@ const Users = () => {
     const [drawerDirty, setDrawerDirty] = useState(false);
 
     // Fetch Active Users
-    const { data: activeUsers = [], isLoading: isLoadingActive } = useQuery({
+    const { data: activeUsers = [], isLoading: isLoadingActive, isError: isErrorActive, refetch: refetchActive } = useQuery({
         queryKey: ['adminUsers'],
         queryFn: async () => {
             const res = await api.get('/api/v1/admin/users');
             return res.data;
-        }
+        },
+        retry: 3,
+        retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 15000),
     });
 
     // Fetch Deleted Users (Last 30 Days)
-    const { data: deletedUsers = [], isLoading: isLoadingDeleted } = useQuery({
+    const { data: deletedUsers = [], isLoading: isLoadingDeleted, isError: isErrorDeleted, refetch: refetchDeleted } = useQuery({
         queryKey: ['adminDeletedUsers'],
         queryFn: async () => {
             const res = await api.get('/api/v1/admin/deleted-users');
             return res.data;
-        }
+        },
+        retry: 3,
+        retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 15000),
     });
+
+    // Slow-load detection — show friendly message after 5s
+    const [slowLoad, setSlowLoad] = useState(false);
+    useEffect(() => {
+        if (!isLoadingActive && !isLoadingDeleted) { setSlowLoad(false); return; }
+        const t = setTimeout(() => setSlowLoad(true), 5000);
+        return () => clearTimeout(t);
+    }, [isLoadingActive, isLoadingDeleted]);
 
     // Mutation: Edit Points
     const updatePointsMutation = useMutation({
@@ -176,7 +188,28 @@ const Users = () => {
                 {/* Users Table */}
                 <div className="overflow-x-auto">
                     {isLoading ? (
-                        <div className="p-8 text-center text-gray-400">Loading members...</div>
+                        <div className="p-12 flex flex-col items-center justify-center gap-3 text-center">
+                            <div className="w-8 h-8 border-2 border-gold border-t-transparent rounded-full animate-spin" />
+                            <p className="text-gray-400 font-medium">
+                                {slowLoad ? 'Waking up server… this takes up to 60s on first load' : 'Loading members...'}
+                            </p>
+                            {slowLoad && (
+                                <p className="text-gray-600 text-xs max-w-sm">
+                                    The backend is on a free-tier server that sleeps after inactivity. It will load shortly — please wait.
+                                </p>
+                            )}
+                        </div>
+                    ) : (isErrorActive && activeTab === 'active') || (isErrorDeleted && activeTab === 'deleted') ? (
+                        <div className="p-12 flex flex-col items-center gap-3 text-center">
+                            <p className="text-red-400 font-medium">Failed to load users</p>
+                            <p className="text-gray-500 text-sm">The server may be temporarily unavailable.</p>
+                            <button
+                                onClick={() => activeTab === 'active' ? refetchActive() : refetchDeleted()}
+                                className="mt-2 px-4 py-2 bg-gold/10 hover:bg-gold/20 text-gold text-sm font-semibold rounded-lg border border-gold/30 transition-colors"
+                            >
+                                Retry
+                            </button>
+                        </div>
                     ) : filteredUsers.length === 0 ? (
                         <div className="p-12 text-center text-gray-500">
                             {activeTab === 'active' 
