@@ -203,27 +203,6 @@ const Content = () => {
                 </div>
             )}
 
-            {/* Supabase SQL Helper */}
-            <div className="mt-8 bg-surface border border-input rounded-2xl p-6">
-                <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-widest">Setup — Run in Supabase SQL Editor (one-time)</h3>
-                <pre className="bg-[#0a0a0a] text-green-400 text-xs rounded-xl p-4 overflow-x-auto leading-relaxed">{`CREATE TABLE IF NOT EXISTS app_content (
-  key TEXT PRIMARY KEY,
-  value TEXT NOT NULL DEFAULT '',
-  label TEXT,
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-INSERT INTO app_content (key, value, label) VALUES
-  ('hero_title', 'Total Points', 'Home Hero Title'),
-  ('tier_gold_label', 'Gold Tier', 'Gold Tier Label'),
-  ('tier_platinum_threshold', '1000 to Platinum', 'Points to Platinum Text'),
-  ('quick_action_refer', 'Refer Friend', 'Quick Action: Refer Label'),
-  ('quick_action_redeem', 'Redeem', 'Quick Action: Redeem Label'),
-  ('quick_action_events', 'Events', 'Quick Action: Events Label'),
-  ('announcement_banner', '', 'Announcement Banner Text'),
-  ('announcement_active', 'false', 'Show Announcement Banner')
-ON CONFLICT (key) DO NOTHING;`}</pre>
-            </div>
         </div>
     );
 };
