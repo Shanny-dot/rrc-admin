@@ -11,7 +11,6 @@ import Login from './pages/Login';
 import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
-import Content from './pages/Content';
 import Sidebar from './components/Sidebar';
 
 const ProtectedRoute = ({ children, session }) => {
@@ -61,7 +60,6 @@ function App() {
         <Route path="/rewards" element={<ProtectedRoute session={session}><Rewards /></ProtectedRoute>} />
         <Route path="/redemptions" element={<ProtectedRoute session={session}><Redemptions /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute session={session}><Transactions /></ProtectedRoute>} />
-        <Route path="/content" element={<ProtectedRoute session={session}><Content /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
