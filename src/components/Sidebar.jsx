@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Calendar, Gift, CheckCircle, List, LogOut } from 'lucide-react';
+import { Home, Users, Calendar, Gift, CheckCircle, List, LogOut, UserPlus } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 const Sidebar = () => {
@@ -9,6 +9,7 @@ const Sidebar = () => {
     const links = [
         { name: 'Dashboard', path: '/', icon: Home },
         { name: 'Users', path: '/users', icon: Users },
+        { name: 'Referrals', path: '/referrals', icon: UserPlus },
         { name: 'Events', path: '/events', icon: Calendar },
         { name: 'Rewards', path: '/rewards', icon: Gift },
         { name: 'Redemptions', path: '/redemptions', icon: CheckCircle },
