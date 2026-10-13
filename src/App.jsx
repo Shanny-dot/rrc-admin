@@ -9,10 +9,20 @@ import Redemptions from './pages/Redemptions';
 import Transactions from './pages/Transactions';
 import Referrals from './pages/Referrals';
 import Login from './pages/Login';
+import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Sidebar from './components/Sidebar';
+
+// A password-reset email link can land on any page of this site (Supabase falls back to
+// the Site URL). Send it to the "Set a new password" page, keeping the link's token.
+if (typeof window !== 'undefined' && window.location.pathname !== '/reset-password') {
+  const h = window.location.hash;
+  if (h.includes('type=recovery') || h.includes('error_code=otp_expired')) {
+    window.history.replaceState(null, '', '/reset-password' + window.location.search + h);
+  }
+}
 
 const ProtectedRoute = ({ children, session }) => {
   if (!session) return <Navigate to="/login" replace />;
@@ -51,6 +61,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/support" element={<Support />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
