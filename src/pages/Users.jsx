@@ -3,6 +3,11 @@ import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check, Eye,
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
+// Keep these in step with the app's profile drop-downs (lib/screens/redesign/profile_screen.dart).
+const HOME_OWNERSHIP_OPTIONS = ['Own outright', 'Own with a mortgage', 'Renting', 'Living with family', 'Other'];
+const INCOME_OPTIONS = ['Under $50,000', '$50,000 – $100,000', '$100,000 – $150,000', '$150,000 – $200,000', '$200,000 – $300,000', 'Over $300,000', 'Prefer not to say'];
+
+
 const Users = () => {
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'deleted'
@@ -655,25 +660,27 @@ const Users = () => {
                                     <div>
                                         <label className="text-xs text-gray-400 block mb-1">Home Ownership</label>
                                         <select
-                                            value={drawerForm.home_ownership_status || drawerForm.home_ownership || ''}
-                                            onChange={e => handleDrawerChange('home_ownership_status', e.target.value)}
+                                            value={drawerForm.home_ownership || drawerForm.home_ownership_status || ''}
+                                            onChange={e => handleDrawerChange('home_ownership', e.target.value)}
                                             className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
                                         >
                                             <option value="">— Select —</option>
-                                            <option value="Owner">Owner</option>
-                                            <option value="Renter">Renter</option>
-                                            <option value="Living with family">Living with family</option>
-                                            <option value="Other">Other</option>
+                                            {HOME_OWNERSHIP_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                                         </select>
                                     </div>
                                     <div className="col-span-2">
                                         <label className="text-xs text-gray-400 block mb-1">Annual Income</label>
-                                        <input
+                                        <select
                                             value={drawerForm.annual_income || ''}
                                             onChange={e => handleDrawerChange('annual_income', e.target.value)}
                                             className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors"
-                                            placeholder="e.g. $80,000 – $100,000"
-                                        />
+                                        >
+                                            <option value="">— Select —</option>
+                                            {drawerForm.annual_income && !INCOME_OPTIONS.includes(drawerForm.annual_income) && (
+                                                <option value={drawerForm.annual_income}>{drawerForm.annual_income} (old value)</option>
+                                            )}
+                                            {INCOME_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                                        </select>
                                     </div>
                                 </div>
                             </section>

@@ -18,7 +18,12 @@ const Rewards = () => {
         points_required: 0,
         image_url: '',
         stock: 0,
-        is_active: true
+        is_active: true,
+        dollar_value: '',
+        what_you_get: '',
+        delivery_info: '',
+        expiry_info: '',
+        terms: ''
     });
 
     const { data: rewards = [], isLoading } = useQuery({
@@ -70,7 +75,12 @@ const Rewards = () => {
                 points_required: reward.points_required || 0,
                 image_url: reward.image_url || '',
                 stock: reward.stock || 0,
-                is_active: reward.is_active
+                is_active: reward.is_active,
+                dollar_value: reward.dollar_value ?? '',
+                what_you_get: reward.what_you_get || '',
+                delivery_info: reward.delivery_info || '',
+                expiry_info: reward.expiry_info || '',
+                terms: reward.terms || ''
             });
         } else {
             setEditingReward(null);
@@ -81,7 +91,12 @@ const Rewards = () => {
                 points_required: 0,
                 image_url: '',
                 stock: 0,
-                is_active: true
+                is_active: true,
+                dollar_value: '',
+                what_you_get: '',
+                delivery_info: '',
+                expiry_info: '',
+                terms: ''
             });
         }
         setIsModalOpen(true);
@@ -189,7 +204,12 @@ const Rewards = () => {
 
         const payload = {
             ...formData,
-            stock: formData.stock > 0 ? formData.stock : null
+            stock: formData.stock > 0 ? formData.stock : null,
+            dollar_value: formData.dollar_value === '' || formData.dollar_value === null ? null : Number(formData.dollar_value),
+            what_you_get: formData.what_you_get.trim() || null,
+            delivery_info: formData.delivery_info.trim() || null,
+            expiry_info: formData.expiry_info.trim() || null,
+            terms: formData.terms.trim() || null
         };
 
         if (editingReward) {
@@ -485,6 +505,69 @@ const Rewards = () => {
                                         value={formData.stock}
                                         onChange={handleInputChange}
                                         min="0"
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    />
+                                </div>
+
+
+                                <div className="md:col-span-2 pt-2 border-t border-input">
+                                    <p className="text-sm font-semibold text-gold mt-2">Shown on the reward's detail page in the app</p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-300">Dollar value ($)</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        name="dollar_value"
+                                        value={formData.dollar_value}
+                                        onChange={(e) => setFormData(prev => ({ ...prev, dollar_value: e.target.value }))}
+                                        placeholder="e.g. 50"
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-300">What you get</label>
+                                    <input
+                                        type="text"
+                                        name="what_you_get"
+                                        value={formData.what_you_get}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. One tandem jump for one person"
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-300">How it's delivered</label>
+                                    <input
+                                        type="text"
+                                        name="delivery_info"
+                                        value={formData.delivery_info}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. Voucher emailed within 5 business days"
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-gray-300">Expires</label>
+                                    <input
+                                        type="text"
+                                        name="expiry_info"
+                                        value={formData.expiry_info}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. 12 months from issue"
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    />
+                                </div>
+
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-medium text-gray-300">Terms and conditions</label>
+                                    <textarea
+                                        rows="3"
+                                        name="terms"
+                                        value={formData.terms}
+                                        onChange={handleInputChange}
                                         className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
                                     />
                                 </div>
