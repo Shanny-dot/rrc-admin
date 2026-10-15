@@ -8,6 +8,7 @@ import Rewards from './pages/Rewards';
 import Redemptions from './pages/Redemptions';
 import Transactions from './pages/Transactions';
 import Referrals from './pages/Referrals';
+import HelpContact from './pages/HelpContact';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
@@ -73,6 +74,7 @@ function App() {
         <Route path="/redemptions" element={<ProtectedRoute session={session}><Redemptions /></ProtectedRoute>} />
         <Route path="/transactions" element={<ProtectedRoute session={session}><Transactions /></ProtectedRoute>} />
         <Route path="/referrals" element={<ProtectedRoute session={session}><Referrals /></ProtectedRoute>} />
+        <Route path="/help-contact" element={<ProtectedRoute session={session}><HelpContact /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
