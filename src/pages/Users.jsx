@@ -629,6 +629,17 @@ const Users = () => {
                                         />
                                     </div>
                                     <div>
+                                        <label className="text-xs text-gray-400 block mb-1" title="Each year on this date the member gets an 'Is your loan still competitive?' check-in (and the loan anniversary bonus, if set).">
+                                            Loan settled on
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={drawerForm.loan_settled_on || ''}
+                                            onChange={e => handleDrawerChange('loan_settled_on', e.target.value)}
+                                            className="w-full bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold transition-colors [color-scheme:dark]"
+                                        />
+                                    </div>
+                                    <div>
                                         <label className="text-xs text-gray-400 block mb-1">Gender</label>
                                         <select
                                             value={drawerForm.gender || ''}

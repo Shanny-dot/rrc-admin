@@ -11,6 +11,7 @@ import Referrals from './pages/Referrals';
 import HelpContact from './pages/HelpContact';
 import Feedback from './pages/Feedback';
 import BrokerRequests from './pages/BrokerRequests';
+import ProgramSettings from './pages/ProgramSettings';
 import Join from './pages/Join';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
@@ -81,6 +82,7 @@ function App() {
         <Route path="/help-contact" element={<ProtectedRoute session={session}><HelpContact /></ProtectedRoute>} />
         <Route path="/feedback" element={<ProtectedRoute session={session}><Feedback /></ProtectedRoute>} />
         <Route path="/broker-requests" element={<ProtectedRoute session={session}><BrokerRequests /></ProtectedRoute>} />
+        <Route path="/program-settings" element={<ProtectedRoute session={session}><ProgramSettings /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

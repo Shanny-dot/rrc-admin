@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, Users, X, QrCode } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Users, X, QrCode, Heart } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/axios';
+import ThankYouModal from '../components/ThankYouModal';
 
 const Events = () => {
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingEvent, setEditingEvent] = useState(null);
     const [qrEvent, setQrEvent] = useState(null);
+    const [thanksEvent, setThanksEvent] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         category: '',
@@ -221,6 +223,15 @@ const Events = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-3">
+                                                {new Date(event.event_date) < new Date() && (
+                                                    <button
+                                                        onClick={() => setThanksEvent(event)}
+                                                        className={`transition-colors ${event.thank_you_sent_at ? 'text-gold' : 'text-gray-400 hover:text-gold'}`}
+                                                        title={event.thank_you_sent_at ? `Thank-you sent ${new Date(event.thank_you_sent_at).toLocaleDateString('en-AU')}` : 'Send a thank-you to attendees'}
+                                                    >
+                                                        <Heart size={18} />
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => setQrEvent(event)}
                                                     className="text-gray-400 hover:text-gold transition-colors"
@@ -414,6 +425,7 @@ const Events = () => {
                     </div>
                 </div>
             )}
+            {thanksEvent && <ThankYouModal event={thanksEvent} onClose={() => setThanksEvent(null)} />}
             {/* QR Code Modal */}
             {qrEvent && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
