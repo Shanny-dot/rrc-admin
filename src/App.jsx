@@ -9,6 +9,8 @@ import Redemptions from './pages/Redemptions';
 import Transactions from './pages/Transactions';
 import Referrals from './pages/Referrals';
 import HelpContact from './pages/HelpContact';
+import Feedback from './pages/Feedback';
+import Join from './pages/Join';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
@@ -66,6 +68,7 @@ function App() {
         <Route path="/support" element={<Support />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/join/:code" element={<Join />} />
 
         <Route path="/" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute session={session}><Users /></ProtectedRoute>} />
@@ -75,6 +78,7 @@ function App() {
         <Route path="/transactions" element={<ProtectedRoute session={session}><Transactions /></ProtectedRoute>} />
         <Route path="/referrals" element={<ProtectedRoute session={session}><Referrals /></ProtectedRoute>} />
         <Route path="/help-contact" element={<ProtectedRoute session={session}><HelpContact /></ProtectedRoute>} />
+        <Route path="/feedback" element={<ProtectedRoute session={session}><Feedback /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
