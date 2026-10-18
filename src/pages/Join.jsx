@@ -27,7 +27,7 @@ const Join = () => {
     const device = platform();
 
     useEffect(() => {
-        document.title = 'Join Reliance Rewards';
+        document.title = 'Join Reliiance Rewards';
         fetch(`${API}/api/v1/referrals/invite/${encodeURIComponent(code)}`, { method: 'POST' })
             .then((r) => r.json())
             .then(setInvite)
@@ -75,10 +75,10 @@ const Join = () => {
                 ) : (
                     <>
                         <h1 className="text-3xl font-bold leading-tight mb-3">
-                            {valid && inviter ? `${inviter} invited you to Reliance Rewards` : 'Join Reliance Rewards'}
+                            {valid && inviter ? `${inviter} invited you to Reliiance Rewards` : 'Join Reliiance Rewards'}
                         </h1>
                         <p className="text-gray-400 leading-relaxed mb-8">
-                            Reliance clients earn points for referrals and events, and swap them for experiences, gift cards and more.
+                            Reliiance clients earn points for referrals and events, and swap them for experiences, gift cards and more.
                             {valid && ' Download the app and sign up — your invite code is added for you.'}
                         </p>
 

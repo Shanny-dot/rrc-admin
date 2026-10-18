@@ -85,7 +85,7 @@ const Feedback = () => {
                                     <div className="flex items-center gap-2">
                                         {member.email && (
                                             <a
-                                                href={`mailto:${member.email}?subject=${encodeURIComponent('Re: your Reliance Rewards feedback')}`}
+                                                href={`mailto:${member.email}?subject=${encodeURIComponent('Re: your Reliiance Rewards feedback')}`}
                                                 className="flex items-center gap-1.5 text-sm text-gold hover:text-gold-light px-3 py-1.5"
                                             >
                                                 <Mail size={15} /> Reply

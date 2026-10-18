@@ -6,7 +6,7 @@ import { api } from '../lib/axios';
 // Settings shown on the app's Help page and the "Contact us" card on Home.
 const CONTACT_FIELDS = [
     { key: 'contact_card_title', label: 'Card title on Home', placeholder: 'Contact us' },
-    { key: 'contact_name', label: 'Name under the title', placeholder: 'Your Reliance broker' },
+    { key: 'contact_name', label: 'Name under the title', placeholder: 'Your Reliiance broker' },
     { key: 'contact_phone', label: 'Phone number', placeholder: '02 9000 0000' },
     { key: 'contact_email', label: 'Email address', placeholder: 'hello@reliance.com.au' },
     { key: 'contact_booking_url', label: 'Book-a-time link', placeholder: 'https://calendly.com/...' },
