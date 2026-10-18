@@ -6,21 +6,22 @@ import { api } from '../lib/axios';
 // Stages the member sees on their referral tracker, in order.
 const STAGES = [
     { value: 'invited', label: 'Invited' },
-    { value: 'contacted', label: 'Contacted' },
-    { value: 'loan_in_progress', label: 'Loan in progress' },
-    { value: 'settled', label: 'Settled' },
+    { value: 'registered', label: 'Pending / signed up' },
     { value: 'rewarded', label: 'Points added' },
     { value: 'closed', label: 'Not proceeding' },
 ];
 
-// Older rows use these statuses; they sit at the "Invited" stage.
-const normalise = (status) => (status === 'pending' || status === 'registered' ? 'invited' : status);
+// Older rows use these statuses: "pending" sits at Invited; the old detailed loan stages
+// (contacted, loan in progress, settled) sit at the middle stage.
+const normalise = (status) => {
+    if (status === 'pending') return 'invited';
+    if (['contacted', 'loan_in_progress', 'settled'].includes(status)) return 'registered';
+    return status;
+};
 
 const STAGE_STYLES = {
     invited: 'bg-orange-500/10 text-orange-400',
-    contacted: 'bg-blue-500/10 text-blue-400',
-    loan_in_progress: 'bg-blue-500/10 text-blue-400',
-    settled: 'bg-green-500/10 text-green-400',
+    registered: 'bg-blue-500/10 text-blue-400',
     rewarded: 'bg-green-500/10 text-green-400',
     closed: 'bg-red-500/10 text-red-400',
 };
@@ -137,7 +138,7 @@ const Referrals = () => {
                                             </td>
                                             <td className="px-6 py-4 text-white font-medium">
                                                 {r.referred_name}
-                                                {r.status === 'registered' && <p className="text-green-400 text-xs mt-0.5">Joined the app</p>}
+                                                {r.referred_user_id && <p className="text-green-400 text-xs mt-0.5">Joined the app</p>}
                                             </td>
                                             <td className="px-6 py-4 text-gray-300">
                                                 {r.referred_mobile && <p>{r.referred_mobile}</p>}

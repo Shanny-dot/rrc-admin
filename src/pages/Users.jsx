@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
 // Keep these in step with the app's profile drop-downs (lib/screens/redesign/profile_screen.dart).
-const HOME_OWNERSHIP_OPTIONS = ['Own outright', 'Own with a mortgage', 'Renting', 'Living with family', 'Other'];
+const HOME_OWNERSHIP_OPTIONS = ['Own outright', 'Own with a mortgage', 'Renting/boarding', 'Other'];
 const INCOME_OPTIONS = ['Under $50,000', '$50,000 – $100,000', '$100,000 – $150,000', '$150,000 – $200,000', '$200,000 – $300,000', 'Over $300,000', 'Prefer not to say'];
 
 

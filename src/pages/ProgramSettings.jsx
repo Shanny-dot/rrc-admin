@@ -5,6 +5,7 @@ import { api } from '../lib/axios';
 
 // Points rules members see in the app. Every value is a whole number; 0 switches it off.
 const FIELDS = [
+    { key: 'welcome_points', label: 'Welcome points', help: 'Added automatically to every new member\'s account when they sign up (100 if never set).', unit: 'points', fallback: '100' },
     { key: 'referral_points', label: 'Points per referral', help: 'Awarded when you move a referral to "Points added" (you can override it per referral).', unit: 'points' },
     { key: 'bonus_birthday_points', label: 'Birthday bonus', help: 'Added on the member\'s birthday, with a "Happy birthday" alert. Needs their date of birth.', unit: 'points' },
     { key: 'bonus_loan_anniversary_points', label: 'Loan anniversary bonus', help: 'Added each year on the date their own loan settled (set it on the member in Users).', unit: 'points' },
@@ -24,7 +25,7 @@ const ProgramSettings = () => {
     });
 
     useEffect(() => {
-        if (content) setValues(Object.fromEntries(FIELDS.map((f) => [f.key, content[f.key] ?? '0'])));
+        if (content) setValues(Object.fromEntries(FIELDS.map((f) => [f.key, content[f.key] ?? f.fallback ?? '0'])));
     }, [content]);
 
     const save = async () => {
@@ -41,7 +42,7 @@ const ProgramSettings = () => {
                 if (value !== String(content?.[f.key] ?? '')) await api.put(`/api/v1/content/${f.key}`, { value });
             }
             await queryClient.invalidateQueries(['appContent']);
-            setMessage({ error: false, text: 'Saved. The new rules apply from the next daily run (about 8am Sydney time).' });
+            setMessage({ error: false, text: 'Saved. Welcome and referral points apply straight away; bonuses and expiry from the next daily run (about 8am Sydney time).' });
         } catch (err) {
             setMessage({ error: true, text: err.response?.data?.detail || err.message });
         } finally {
@@ -57,7 +58,7 @@ const ProgramSettings = () => {
             <div className="mb-8 flex items-start justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Program settings</h1>
-                    <p className="text-gray-400 mt-1">Points for referrals, surprise bonuses and points expiry. Set any of them to 0 to switch it off.</p>
+                    <p className="text-gray-400 mt-1">Welcome points, points for referrals, surprise bonuses and points expiry. Set any of them to 0 to switch it off.</p>
                 </div>
                 <button
                     onClick={save}

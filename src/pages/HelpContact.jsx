@@ -3,9 +3,10 @@ import { Plus, Trash2, ArrowUp, ArrowDown, Save } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
-// Settings shown on the app's Help page and "Talk to my broker" buttons.
+// Settings shown on the app's Help page and the "Contact us" card on Home.
 const CONTACT_FIELDS = [
-    { key: 'contact_name', label: 'Name on the broker card', placeholder: 'Your Reliance broker' },
+    { key: 'contact_card_title', label: 'Card title on Home', placeholder: 'Contact us' },
+    { key: 'contact_name', label: 'Name under the title', placeholder: 'Your Reliance broker' },
     { key: 'contact_phone', label: 'Phone number', placeholder: '02 9000 0000' },
     { key: 'contact_email', label: 'Email address', placeholder: 'hello@reliance.com.au' },
     { key: 'contact_booking_url', label: 'Book-a-time link', placeholder: 'https://calendly.com/...' },
@@ -15,7 +16,7 @@ const LINK_FIELDS = [
     { key: 'terms_url', label: 'Program terms link' },
     { key: 'privacy_url', label: 'Privacy policy link' },
 ];
-const KEYS = [...CONTACT_FIELDS, ...LINK_FIELDS].map((f) => f.key);
+const KEYS = [...CONTACT_FIELDS, ...LINK_FIELDS, { key: 'tiers_intro' }].map((f) => f.key);
 
 const inputClass = 'w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors';
 
@@ -35,9 +36,15 @@ const HelpContact = () => {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState(null);
 
+    const [tiers, setTiers] = useState([]);
+
     const { data: content, isLoading, isError } = useQuery({
         queryKey: ['appContent'],
         queryFn: async () => (await api.get('/api/v1/content')).data,
+    });
+    const { data: savedTiers } = useQuery({
+        queryKey: ['adminTiers'],
+        queryFn: async () => (await api.get('/api/v1/admin/tiers')).data,
     });
 
     useEffect(() => {
@@ -45,6 +52,13 @@ const HelpContact = () => {
         setValues(Object.fromEntries(KEYS.map((k) => [k, content[k] || ''])));
         setFaq(parseFaq(content.help_faq));
     }, [content]);
+
+    useEffect(() => {
+        if (savedTiers) setTiers(savedTiers.map((t) => ({ id: t.id, name: t.name, min_points: String(t.min_points ?? 0), benefits: t.benefits || '' })));
+    }, [savedTiers]);
+
+    const updateTier = (index, field, value) => setTiers((items) => items.map((t, i) => (i === index ? { ...t, [field]: value } : t)));
+    const tiersJson = (list) => JSON.stringify(list.map((t) => ({ id: t.id, name: t.name.trim(), min_points: String(t.min_points).trim(), benefits: t.benefits.trim() })));
 
     const updateFaq = (index, field, value) => setFaq((items) => items.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
     const moveFaq = (index, delta) => setFaq((items) => {
@@ -72,6 +86,13 @@ const HelpContact = () => {
             if (faqJson !== JSON.stringify(parseFaq(content?.help_faq))) {
                 await api.put('/api/v1/content/help_faq', { value: faqJson });
             }
+            const original = (savedTiers || []).map((t) => ({ id: t.id, name: t.name, min_points: String(t.min_points ?? 0), benefits: t.benefits || '' }));
+            if (tiersJson(tiers) !== tiersJson(original)) {
+                await api.put('/api/v1/admin/tiers', {
+                    tiers: tiers.map((t) => ({ id: t.id, name: t.name.trim(), min_points: parseInt(t.min_points, 10), benefits: t.benefits })),
+                });
+                await queryClient.invalidateQueries(['adminTiers']);
+            }
             await queryClient.invalidateQueries(['appContent']);
             setMessage({ error: false, text: 'Saved. Members see the changes next time they open Help.' });
         } catch (err) {
@@ -90,7 +111,7 @@ const HelpContact = () => {
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Help &amp; Contact</h1>
                     <p className="text-gray-400 mt-1">
-                        What members see on the app's Help page and the "Talk to my broker" buttons. Leave a field empty to hide that button.
+                        What members see on the app's Help page, the "Contact us" card on Home and the member tiers page. Leave a contact field empty to hide that button.
                     </p>
                 </div>
                 <button
@@ -158,6 +179,61 @@ const HelpContact = () => {
                                 placeholder="Answer"
                                 rows={3}
                                 onChange={(e) => updateFaq(i, 'a', e.target.value)}
+                                className={inputClass}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section className="bg-surface rounded-2xl border border-input p-6 mb-6">
+                <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-lg font-semibold text-white">Member tiers</h2>
+                    <button
+                        onClick={() => setTiers((items) => [...items, { id: null, name: '', min_points: '', benefits: '' }])}
+                        className="text-gold hover:text-gold-light flex items-center gap-1.5 text-sm font-medium"
+                    >
+                        <Plus size={16} /> Add tier
+                    </button>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">
+                    Shown when members tap "What do tiers give me?" in Help &amp; contact. The first tier must start at 0 points.
+                </p>
+                <label className="block mb-5">
+                    <span className="block text-sm text-gray-400 mb-1.5">Intro text at the top of the page (optional)</span>
+                    <textarea
+                        rows={2}
+                        value={values.tiers_intro || ''}
+                        placeholder="Your tier is based on all the points you've earned, so redeeming rewards never moves you down."
+                        onChange={(e) => setValues((v) => ({ ...v, tiers_intro: e.target.value }))}
+                        className={inputClass}
+                    />
+                </label>
+                <div className="space-y-4">
+                    {tiers.map((t, i) => (
+                        <div key={t.id || `new-${i}`} className="border border-input rounded-xl p-4">
+                            <div className="flex gap-2 mb-2">
+                                <input
+                                    value={t.name}
+                                    placeholder="Tier name, e.g. Gold"
+                                    onChange={(e) => updateTier(i, 'name', e.target.value)}
+                                    className={`${inputClass} font-medium`}
+                                />
+                                <input
+                                    inputMode="numeric"
+                                    value={t.min_points}
+                                    placeholder="Points needed"
+                                    onChange={(e) => updateTier(i, 'min_points', e.target.value)}
+                                    className={`${inputClass} max-w-[160px]`}
+                                />
+                                <button onClick={() => setTiers((items) => items.filter((_, j) => j !== i))} title="Remove tier"
+                                    className="p-2 text-gray-400 hover:text-red-400"><Trash2 size={18} /></button>
+                            </div>
+                            <textarea
+                                value={t.benefits}
+                                placeholder={'What members get — one benefit per line'}
+                                rows={3}
+                                onChange={(e) => updateTier(i, 'benefits', e.target.value)}
                                 className={inputClass}
                             />
                         </div>

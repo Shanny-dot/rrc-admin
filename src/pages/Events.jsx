@@ -5,24 +5,31 @@ import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/axios';
 import ThankYouModal from '../components/ThankYouModal';
 
+// "50" or "50–100" when an "up to" amount is set.
+const range = (min, max) => (max > (min || 0) ? `${min || 0}–${max}` : min || 0);
+
+const EMPTY_FORM = {
+    title: '',
+    category: '',
+    description: '',
+    location: '',
+    event_date: '',
+    image_url: '',
+    points_for_attending: 0,
+    points_for_attending_max: 0,
+    points_for_referring: 0,
+    points_for_referring_max: 0,
+    capacity: 0,
+    is_active: true
+};
+
 const Events = () => {
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingEvent, setEditingEvent] = useState(null);
     const [qrEvent, setQrEvent] = useState(null);
     const [thanksEvent, setThanksEvent] = useState(null);
-    const [formData, setFormData] = useState({
-        title: '',
-        category: '',
-        description: '',
-        location: '',
-        event_date: '',
-        image_url: '',
-        points_for_attending: 0,
-        points_for_referring: 0,
-        capacity: 0,
-        is_active: true
-    });
+    const [formData, setFormData] = useState(EMPTY_FORM);
 
     const { data: events = [], isLoading } = useQuery({
         queryKey: ['adminEvents'],
@@ -66,24 +73,15 @@ const Events = () => {
                 event_date: event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '',
                 image_url: event.image_url || '',
                 points_for_attending: event.points_for_attending || 0,
+                points_for_attending_max: event.points_for_attending_max || 0,
                 points_for_referring: event.points_for_referring || 0,
+                points_for_referring_max: event.points_for_referring_max || 0,
                 capacity: event.capacity || 0,
                 is_active: event.is_active
             });
         } else {
             setEditingEvent(null);
-            setFormData({
-                title: '',
-                category: '',
-                description: '',
-                location: '',
-                event_date: '',
-                image_url: '',
-                points_for_attending: 0,
-                points_for_referring: 0,
-                capacity: 0,
-                is_active: true
-            });
+            setFormData(EMPTY_FORM);
         }
         setIsModalOpen(true);
     };
@@ -109,7 +107,10 @@ const Events = () => {
             ...formData,
             category: formData.category ? formData.category.trim() : null,
             event_date: new Date(formData.event_date).toISOString(),
-            capacity: formData.capacity > 0 ? formData.capacity : null
+            capacity: formData.capacity > 0 ? formData.capacity : null,
+            // An empty "up to" (or the same number) means a fixed amount.
+            points_for_attending_max: formData.points_for_attending_max > formData.points_for_attending ? formData.points_for_attending_max : null,
+            points_for_referring_max: formData.points_for_referring_max > formData.points_for_referring ? formData.points_for_referring_max : null,
         };
 
         if (editingEvent) {
@@ -201,8 +202,8 @@ const Events = () => {
                                             <p className="text-gray-500 text-xs mt-0.5">{event.location}</p>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <p className="text-gold font-bold">+{event.points_for_attending} Attend</p>
-                                            <p className="text-green-400 text-xs mt-0.5">+{event.points_for_referring} Ref</p>
+                                            <p className="text-gold font-bold">+{range(event.points_for_attending, event.points_for_attending_max)} Attend</p>
+                                            <p className="text-green-400 text-xs mt-0.5">+{range(event.points_for_referring, event.points_for_referring_max)} Ref</p>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-1.5 text-gray-300">
@@ -355,29 +356,37 @@ const Events = () => {
                                     />
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-300">Points for Attending</label>
-                                    <input
-                                        type="number"
-                                        name="points_for_attending"
-                                        value={formData.points_for_attending}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
-                                    />
-                                </div>
-
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium text-gray-300">Points for Referring</label>
-                                    <input
-                                        type="number"
-                                        name="points_for_referring"
-                                        value={formData.points_for_referring}
-                                        onChange={handleInputChange}
-                                        min="0"
-                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
-                                    />
-                                </div>
+                                {[
+                                    { key: 'points_for_attending', label: 'Points for Attending' },
+                                    { key: 'points_for_referring', label: 'Points for Bringing a Friend' },
+                                ].map(({ key, label }) => (
+                                    <div key={key} className="space-y-2">
+                                        <label className="text-sm font-medium text-gray-300">{label}</label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                name={key}
+                                                value={formData[key]}
+                                                onChange={handleInputChange}
+                                                min="0"
+                                                className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                            />
+                                            <span className="text-gray-400 text-sm shrink-0">up to</span>
+                                            <input
+                                                type="number"
+                                                name={`${key}_max`}
+                                                value={formData[`${key}_max`] || ''}
+                                                placeholder="—"
+                                                onChange={handleInputChange}
+                                                min="0"
+                                                className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500">
+                                            Fill in "up to" to show a range in the app (e.g. 50–100). The first number is added automatically at check-in; add any extra in Users.
+                                        </p>
+                                    </div>
+                                ))}
 
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-gray-300">Capacity (0 for unlimited)</label>
