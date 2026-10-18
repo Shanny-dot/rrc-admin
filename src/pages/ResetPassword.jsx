@@ -73,7 +73,7 @@ export default function ResetPassword() {
         <div className="min-h-screen flex items-center justify-center bg-bg-base relative px-4">
             <div className="w-full max-w-md p-8 bg-surface rounded-2xl border border-input shadow-2xl">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gold mb-2 tracking-tight">Reliiance Rewards</h1>
+                    <img src="/logo-full.png" alt="Reliiance Rewards" className="w-64 mx-auto mb-4" />
                     <p className="text-gray-400 text-sm">Set a new password</p>
                 </div>
 

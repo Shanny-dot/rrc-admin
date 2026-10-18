@@ -23,7 +23,8 @@ const Sidebar = () => {
     return (
         <div className="w-64 bg-surface h-full border-r border-input p-6 flex flex-col">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gold">RRC Admin</h1>
+                <img src="/logo-full.png" alt="Reliiance Rewards" className="w-full max-w-[200px]" />
+                <p className="text-xs text-gray-500 mt-2 tracking-widest uppercase">Admin</p>
             </div>
 
             <nav className="flex-1 space-y-2">

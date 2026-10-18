@@ -68,7 +68,7 @@ const Join = () => {
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white flex items-center justify-center p-5">
             <div className="w-full max-w-md text-center">
-                <img src="/rrc-logo.png" alt="Reliance Rewards" className="w-24 h-24 rounded-3xl mx-auto mb-8 shadow-[0_0_50px_rgba(250,185,91,0.3)]" />
+                <img src="/logo-full.png" alt="Reliiance Rewards" className="w-72 max-w-full mx-auto mb-10" />
 
                 {invite === null ? (
                     <p className="text-gray-400">Loading your invitation…</p>
