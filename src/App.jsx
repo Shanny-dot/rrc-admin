@@ -13,6 +13,8 @@ import Feedback from './pages/Feedback';
 import BrokerRequests from './pages/BrokerRequests';
 import ProgramSettings from './pages/ProgramSettings';
 import Join from './pages/Join';
+import Download from './pages/Download';
+import Faq from './pages/Faq';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import Support from './pages/Support';
@@ -71,6 +73,8 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/join/:code" element={<Join />} />
+        <Route path="/download" element={<Download />} />
+        <Route path="/faq" element={<Faq />} />
 
         <Route path="/" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
         <Route path="/users" element={<ProtectedRoute session={session}><Users /></ProtectedRoute>} />

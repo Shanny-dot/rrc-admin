@@ -13,6 +13,7 @@ const EMPTY_FORM = {
     category: '',
     description: '',
     location: '',
+    attendee_info: '',
     event_date: '',
     image_url: '',
     points_for_attending: 0,
@@ -70,6 +71,7 @@ const Events = () => {
                 category: event.category || '',
                 description: event.description || '',
                 location: event.location || '',
+                attendee_info: event.attendee_info || '',
                 event_date: event.event_date ? new Date(event.event_date).toISOString().slice(0, 16) : '',
                 image_url: event.image_url || '',
                 points_for_attending: event.points_for_attending || 0,
@@ -342,6 +344,22 @@ const Events = () => {
                                         onChange={handleInputChange}
                                         className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
                                     />
+                                </div>
+
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-medium text-gray-300">Good to know (optional)</label>
+                                    <textarea
+                                        rows="2"
+                                        name="attendee_info"
+                                        value={formData.attendee_info}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. Free parking on level 2 · Webinar link: https://… · Smart casual"
+                                        className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
+                                    />
+                                    <p className="text-xs text-gray-500">
+                                        Parking, webinar link or anything else attendees need. Shown on the event page and in the RSVP and reminder emails.
+                                        Changing the date, location or these details emails everyone booked in.
+                                    </p>
                                 </div>
 
                                 <div className="space-y-2 md:col-span-2">
