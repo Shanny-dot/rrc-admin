@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Search, Plus, Edit2, Trash2, Package, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
-import { supabase } from '../lib/supabase';
+import { uploadImage } from '../lib/uploadImage';
 
 const Rewards = () => {
     const queryClient = useQueryClient();
@@ -118,60 +118,12 @@ const Rewards = () => {
     // --- Image Upload ---
     const handleImageUpload = async (file) => {
         if (!file) return;
-        if (!file.type.startsWith('image/')) {
-            alert('Please upload an image file (jpg, png, gif, webp)');
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            alert('Image must be under 5MB');
-            return;
-        }
-
         setIsUploading(true);
         try {
-            const ext = file.name.split('.').pop();
-            const fileName = `reward_${Date.now()}.${ext}`;
-
-            const { data, error } = await supabase.storage
-                .from('reward-images')
-                .upload(fileName, file, {
-                    cacheControl: '3600',
-                    upsert: false,
-                });
-
-            if (error) {
-                console.error('Upload error:', error);
-                // Try to create the bucket first
-                const { error: bucketError } = await supabase.storage.createBucket('reward-images', {
-                    public: true,
-                    fileSizeLimit: 5242880,
-                });
-
-                if (!bucketError || bucketError.message?.includes('already exists')) {
-                    const { data: retryData, error: retryError } = await supabase.storage
-                        .from('reward-images')
-                        .upload(fileName, file, { cacheControl: '3600', upsert: false });
-
-                    if (retryError) throw retryError;
-
-                    const { data: urlData } = supabase.storage
-                        .from('reward-images')
-                        .getPublicUrl(fileName);
-
-                    setFormData(prev => ({ ...prev, image_url: urlData.publicUrl }));
-                } else {
-                    throw bucketError;
-                }
-            } else {
-                const { data: urlData } = supabase.storage
-                    .from('reward-images')
-                    .getPublicUrl(fileName);
-
-                setFormData(prev => ({ ...prev, image_url: urlData.publicUrl }));
-            }
+            const url = await uploadImage(file, 'rewards');
+            setFormData(prev => ({ ...prev, image_url: url }));
         } catch (err) {
-            console.error('Upload failed:', err);
-            alert('Image upload failed. You can enter a URL manually instead.');
+            alert(err.message);
         } finally {
             setIsUploading(false);
         }
@@ -179,6 +131,7 @@ const Rewards = () => {
 
     const handleFileSelect = (e) => {
         const file = e.target.files?.[0];
+        e.target.value = ''; // so choosing the same file again still uploads
         if (file) handleImageUpload(file);
     };
 
@@ -430,7 +383,7 @@ const Rewards = () => {
                                         <input
                                             ref={fileInputRef}
                                             type="file"
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/webp,image/gif"
                                             onChange={handleFileSelect}
                                             className="hidden"
                                         />

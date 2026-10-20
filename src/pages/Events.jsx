@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Search, Plus, Edit2, Trash2, Users, X, QrCode, Heart } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Users, X, QrCode, Heart, Upload } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/axios';
 import ThankYouModal from '../components/ThankYouModal';
+import { uploadImage } from '../lib/uploadImage';
 
 // "50" or "50–100" when an "up to" amount is set.
 const range = (min, max) => (max > (min || 0) ? `${min || 0}–${max}` : min || 0);
@@ -31,6 +32,7 @@ const Events = () => {
     const [qrEvent, setQrEvent] = useState(null);
     const [thanksEvent, setThanksEvent] = useState(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
+    const [uploading, setUploading] = useState(false);
 
     const { data: events = [], isLoading } = useQuery({
         queryKey: ['adminEvents'],
@@ -363,13 +365,42 @@ const Events = () => {
                                 </div>
 
                                 <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium text-gray-300">Image URL</label>
+                                    <label className="text-sm font-medium text-gray-300">Event Image</label>
+                                    <div className="flex items-center gap-3">
+                                        {formData.image_url && (
+                                            <img src={formData.image_url} alt="" className="w-16 h-16 rounded-lg object-cover bg-[#222] shrink-0"
+                                                onError={(e) => { e.target.style.display = 'none'; }} />
+                                        )}
+                                        <label className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-[#333] text-sm font-medium cursor-pointer transition-colors ${uploading ? 'opacity-50 pointer-events-none' : 'text-gold hover:border-gold'}`}>
+                                            <Upload size={16} /> {uploading ? 'Uploading…' : formData.image_url ? 'Replace image' : 'Upload image'}
+                                            <input
+                                                type="file"
+                                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                                className="hidden"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files?.[0];
+                                                    e.target.value = '';
+                                                    if (!file) return;
+                                                    setUploading(true);
+                                                    try {
+                                                        const url = await uploadImage(file, 'events');
+                                                        setFormData((prev) => ({ ...prev, image_url: url }));
+                                                    } catch (err) {
+                                                        alert(err.message);
+                                                    } finally {
+                                                        setUploading(false);
+                                                    }
+                                                }}
+                                            />
+                                        </label>
+                                        <span className="text-xs text-gray-500">JPG, PNG, WebP or GIF, up to 5 MB</span>
+                                    </div>
                                     <input
                                         type="url"
                                         name="image_url"
                                         value={formData.image_url}
                                         onChange={handleInputChange}
-                                        placeholder="https://..."
+                                        placeholder="…or paste an image link: https://..."
                                         className="w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors"
                                     />
                                 </div>
