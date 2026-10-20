@@ -6,6 +6,7 @@ import { api } from '../lib/axios';
 // Points rules members see in the app. Every value is a whole number; 0 switches it off.
 const FIELDS = [
     { key: 'welcome_points', label: 'Welcome points', help: 'Added automatically to every new member\'s account when they sign up (100 if never set).', unit: 'points', fallback: '100' },
+    { key: 'launch_bonus_points', label: 'Launch QR bonus', help: 'Given instead of the welcome points to people who join from the launch QR codes (the code LAUNCH is filled in for them, or they can type it). 0 = off.', unit: 'points', fallback: '500' },
     { key: 'referral_points', label: 'Points per referral', help: 'Awarded when you move a referral to "Points added" (you can override it per referral).', unit: 'points' },
     { key: 'bonus_birthday_points', label: 'Birthday bonus', help: 'Added on the member\'s birthday, with a "Happy birthday" alert. Needs their date of birth.', unit: 'points' },
     { key: 'bonus_loan_anniversary_points', label: 'Loan anniversary bonus', help: 'Added each year on the date their own loan settled (set it on the member in Users).', unit: 'points' },
