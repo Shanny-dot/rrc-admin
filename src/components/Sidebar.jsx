@@ -14,7 +14,7 @@ const Sidebar = () => {
         { name: 'Rewards', path: '/rewards', icon: Gift },
         { name: 'Redemptions', path: '/redemptions', icon: CheckCircle },
         { name: 'Transactions', path: '/transactions', icon: List },
-        { name: 'Broker requests', path: '/broker-requests', icon: PhoneCall },
+        { name: 'Requests', path: '/broker-requests', icon: PhoneCall },
         { name: 'Feedback', path: '/feedback', icon: MessageSquare },
         { name: 'Program settings', path: '/program-settings', icon: SlidersHorizontal },
         { name: 'Help & Contact', path: '/help-contact', icon: LifeBuoy },

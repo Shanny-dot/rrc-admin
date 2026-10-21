@@ -8,7 +8,7 @@ const STATUS_LABELS = { new: 'New', contacted: 'Contacted', closed: 'Closed' };
 const formatDate = (iso) =>
     iso ? new Date(iso).toLocaleString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
 
-// "Book a time" requests from the app, and "Request a review" from the yearly loan check-in.
+// Members asking to be contacted ("Book a time" in the app), with any details they added.
 const BrokerRequests = () => {
     const queryClient = useQueryClient();
     const [filter, setFilter] = useState('open');
@@ -36,9 +36,10 @@ const BrokerRequests = () => {
         <div className="max-w-5xl mx-auto">
             <div className="mb-8 flex items-end justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Broker requests</h1>
+                    <h1 className="text-3xl font-bold text-white tracking-tight">Requests</h1>
                     <p className="text-gray-400 mt-1">
-                        Members asking their broker to get in touch — "Book a time" and loan review requests{newCount ? ` — ${newCount} new` : ''}.
+                        Members asking to be contacted (about a home loan or any other service), with the details they added{newCount ? ` — ${newCount} new` : ''}.
+                        Each new request is also emailed to the staff address.
                     </p>
                 </div>
                 <select

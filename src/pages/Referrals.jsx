@@ -6,21 +6,18 @@ import { api } from '../lib/axios';
 // Stages the member sees on their referral tracker, in order.
 const STAGES = [
     { value: 'invited', label: 'Invited' },
-    { value: 'registered', label: 'Pending / signed up' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'registered', label: 'Signed up' },
     { value: 'rewarded', label: 'Points added' },
     { value: 'closed', label: 'Not proceeding' },
 ];
 
-// Older rows use these statuses: "pending" sits at Invited; the old detailed loan stages
-// (contacted, loan in progress, settled) sit at the middle stage.
-const normalise = (status) => {
-    if (status === 'pending') return 'invited';
-    if (['contacted', 'loan_in_progress', 'settled'].includes(status)) return 'registered';
-    return status;
-};
+// Older rows used more detailed loan stages; they show as Pending.
+const normalise = (status) => (['contacted', 'loan_in_progress', 'settled'].includes(status) ? 'pending' : status);
 
 const STAGE_STYLES = {
     invited: 'bg-orange-500/10 text-orange-400',
+    pending: 'bg-yellow-500/10 text-yellow-400',
     registered: 'bg-blue-500/10 text-blue-400',
     rewarded: 'bg-green-500/10 text-green-400',
     closed: 'bg-red-500/10 text-red-400',
@@ -38,29 +35,23 @@ const Referrals = () => {
         queryFn: async () => (await api.get('/api/v1/admin/referrals')).data,
     });
 
+    const { data: content } = useQuery({
+        queryKey: ['appContent'],
+        queryFn: async () => (await api.get('/api/v1/content')).data,
+    });
+    const bonus = parseInt(content?.referral_points, 10) || 0;
+
     const stageMutation = useMutation({
-        mutationFn: ({ id, status, points }) =>
-            api.put(`/api/v1/admin/referrals/${id}/stage`, points ? { status, points } : { status }),
+        mutationFn: ({ id, status }) => api.put(`/api/v1/admin/referrals/${id}/stage`, { status }),
         onSuccess: () => queryClient.invalidateQueries(['adminReferrals']),
         onError: (err) => alert(err.response?.data?.detail || err.message),
     });
 
     const changeStage = (ref, status) => {
-        if (status === 'rewarded') {
-            const input = window.prompt(
-                `Award referral points to ${ref.referrer?.full_name || 'the member'} for referring ${ref.referred_name}?\n\n` +
-                'Points to award (leave blank to use the standard referral points setting):',
-                ''
-            );
-            if (input === null) return;
-            const points = input.trim() ? parseInt(input.trim(), 10) : undefined;
-            if (input.trim() && (!points || points <= 0)) {
-                alert('Please enter a positive whole number of points.');
-                return;
-            }
-            stageMutation.mutate({ id: ref.id, status, points });
-            return;
-        }
+        if (status === 'rewarded' && !window.confirm(
+            `Add the referral bonus (${bonus} points) to ${ref.referrer?.full_name || 'the member'} for referring ${ref.referred_name}?\n\n` +
+            'Change the amount on the Program settings page.'
+        )) return;
         stageMutation.mutate({ id: ref.id, status });
     };
 
@@ -80,7 +71,7 @@ const Referrals = () => {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-white tracking-tight">Referrals</h1>
                 <p className="text-gray-400 mt-1">
-                    Update each referral as it progresses. Members see these stages in the app. Moving to "Points added" awards the referral points once.
+                    Update each referral as it progresses. Members see these stages in the app. Moving to "Points added" adds the referral bonus ({bonus} points, set on Program settings) once.
                 </p>
             </div>
 

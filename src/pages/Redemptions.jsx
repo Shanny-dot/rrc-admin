@@ -178,8 +178,8 @@ const Redemptions = () => {
         const approve = actionButton(req, 'approved', CheckCircle, 'Approve', 'bg-green-500/10 hover:bg-green-500/20 text-green-400 border-green-500/20');
         const reject = actionButton(req, 'rejected', XCircle, 'Reject', 'bg-red-500/10 hover:bg-red-500/20 text-red-400 border-red-500/20');
         const sent = actionButton(req, 'sent', Send, 'Mark as sent', 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border-blue-500/20');
-        if (req.status === 'pending') return [inProgress, approve, reject];
-        if (req.status === 'in_progress') return [approve, reject];
+        if (req.status === 'pending') return [inProgress, approve, reject, sent];
+        if (req.status === 'in_progress') return [approve, reject, sent];
         if (req.status === 'approved') return [sent];
         return null;
     };

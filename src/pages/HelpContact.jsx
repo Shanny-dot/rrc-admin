@@ -6,7 +6,7 @@ import { api } from '../lib/axios';
 // Settings shown on the app's Help page and the "Contact us" card on Home.
 const CONTACT_FIELDS = [
     { key: 'contact_card_title', label: 'Card title on Home', placeholder: 'Contact us' },
-    { key: 'contact_name', label: 'Name under the title', placeholder: 'Your Reliiance broker' },
+    { key: 'contact_name', label: 'Name under the title', placeholder: 'The Reliiance team' },
     { key: 'contact_phone', label: 'Phone number', placeholder: '02 9000 0000' },
     { key: 'contact_email', label: 'Email address', placeholder: 'hello@reliance.com.au' },
     { key: 'contact_booking_url', label: 'Book-a-time link', placeholder: 'https://calendly.com/...' },
@@ -16,7 +16,8 @@ const LINK_FIELDS = [
     { key: 'terms_url', label: 'Program terms link' },
     { key: 'privacy_url', label: 'Privacy policy link' },
 ];
-const KEYS = [...CONTACT_FIELDS, ...LINK_FIELDS, { key: 'tiers_intro' }].map((f) => f.key);
+const KEYS = [...CONTACT_FIELDS, ...LINK_FIELDS, { key: 'tiers_intro' }, { key: 'book_time_message' }].map((f) => f.key);
+const BOOK_TIME_DEFAULT = 'Choose a day and time that suits you. A team member will be in touch soon.';
 
 const inputClass = 'w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors';
 
@@ -131,6 +132,16 @@ const HelpContact = () => {
 
             <section className="bg-surface rounded-2xl border border-input p-6 mb-6">
                 <h2 className="text-lg font-semibold text-white mb-4">Contact details</h2>
+                <label className="block mb-4">
+                    <span className="block text-sm text-gray-400 mb-1.5">"Book a time" message (shown at the top of the in-app request form)</span>
+                    <textarea
+                        rows={2}
+                        value={values.book_time_message || ''}
+                        placeholder={BOOK_TIME_DEFAULT}
+                        onChange={(e) => setValues((v) => ({ ...v, book_time_message: e.target.value }))}
+                        className={inputClass}
+                    />
+                </label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {CONTACT_FIELDS.map((f) => (
                         <label key={f.key} className="block">

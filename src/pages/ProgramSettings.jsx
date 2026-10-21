@@ -3,16 +3,16 @@ import { Save } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
 
-// Points rules members see in the app. Every value is a whole number; 0 switches it off.
+// Points rules members see in the app. Numbers are whole numbers; 0 switches that one off.
 const FIELDS = [
-    { key: 'welcome_points', label: 'Welcome points', help: 'Added automatically to every new member\'s account when they sign up (100 if never set).', unit: 'points', fallback: '100' },
-    { key: 'launch_bonus_points', label: 'Launch QR bonus', help: 'Given instead of the welcome points to people who join from the launch QR codes (the code LAUNCH is filled in for them, or they can type it). 0 = off.', unit: 'points', fallback: '500' },
-    { key: 'referral_points', label: 'Points per referral', help: 'Awarded when you move a referral to "Points added" (you can override it per referral).', unit: 'points' },
+    { key: 'welcome_points', label: 'Welcome points', help: 'Added to every new member\'s account when they sign up (on any day except launch day). 0 = no welcome points.', unit: 'points', fallback: '100' },
+    { key: 'launch_date', label: 'Launch day', help: 'Everyone who signs up on this day (Sydney time) gets the launch day bonus below instead of the welcome points.', type: 'date', fallback: '2026-10-25' },
+    { key: 'launch_bonus_points', label: 'Launch day bonus', help: 'Given instead of the welcome points to people who sign up on launch day. 0 = no launch bonus.', unit: 'points', fallback: '100' },
+    { key: 'referral_points', label: 'Referral bonus', help: 'Added to the member who referred a friend when you move that referral to "Points added" on the Referrals page.', unit: 'points' },
     { key: 'bonus_birthday_points', label: 'Birthday bonus', help: 'Added on the member\'s birthday, with a "Happy birthday" alert. Needs their date of birth.', unit: 'points' },
-    { key: 'bonus_loan_anniversary_points', label: 'Loan anniversary bonus', help: 'Added each year on the date their own loan settled (set it on the member in Users).', unit: 'points' },
-    { key: 'bonus_first_referral_points', label: 'First successful referral bonus', help: 'One-off extra points when a member\'s first referral reaches Settled.', unit: 'points' },
     { key: 'points_expiry_months', label: 'Points expire after', help: 'Unused points expire this many months after they were earned. Members get an alert 30 days before. 0 = never expire.', unit: 'months' },
 ];
+const isValid = (f, v) => (f.type === 'date' ? /^\d{4}-\d{2}-\d{2}$/.test(v) : /^\d+$/.test(v));
 
 const ProgramSettings = () => {
     const queryClient = useQueryClient();
@@ -30,16 +30,16 @@ const ProgramSettings = () => {
     }, [content]);
 
     const save = async () => {
-        const bad = FIELDS.find((f) => !/^\d+$/.test(String(values[f.key] ?? '').trim()));
+        const bad = FIELDS.find((f) => !isValid(f, String(values[f.key] ?? '').trim()));
         if (bad) {
-            setMessage({ error: true, text: `${bad.label} must be a whole number (0 to switch it off).` });
+            setMessage({ error: true, text: bad.type === 'date' ? `Please pick a date for ${bad.label}.` : `${bad.label} must be a whole number (0 to switch it off).` });
             return;
         }
         setSaving(true);
         setMessage(null);
         try {
             for (const f of FIELDS) {
-                const value = String(parseInt(values[f.key], 10));
+                const value = f.type === 'date' ? String(values[f.key]).trim() : String(parseInt(values[f.key], 10));
                 if (value !== String(content?.[f.key] ?? '')) await api.put(`/api/v1/content/${f.key}`, { value });
             }
             await queryClient.invalidateQueries(['appContent']);
@@ -59,7 +59,7 @@ const ProgramSettings = () => {
             <div className="mb-8 flex items-start justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Program settings</h1>
-                    <p className="text-gray-400 mt-1">Welcome points, points for referrals, surprise bonuses and points expiry. Set any of them to 0 to switch it off.</p>
+                    <p className="text-gray-400 mt-1">Welcome points, the launch day bonus, the referral bonus, the birthday bonus and points expiry. Set any number to 0 to switch it off.</p>
                 </div>
                 <button
                     onClick={save}
@@ -84,13 +84,24 @@ const ProgramSettings = () => {
                             <div className="text-sm text-gray-400 mt-0.5">{f.help}</div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                            <input
-                                inputMode="numeric"
-                                value={values[f.key] ?? ''}
-                                onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
-                                className="w-28 bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-right focus:outline-none focus:border-gold"
-                            />
-                            <span className="text-sm text-gray-400 w-14">{f.unit}</span>
+                            {f.type === 'date' ? (
+                                <input
+                                    type="date"
+                                    value={values[f.key] ?? ''}
+                                    onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                                    className="w-44 bg-input border border-[#333] rounded-lg px-3 py-2 text-white focus:outline-none focus:border-gold [color-scheme:dark]"
+                                />
+                            ) : (
+                                <>
+                                    <input
+                                        inputMode="numeric"
+                                        value={values[f.key] ?? ''}
+                                        onChange={(e) => setValues((v) => ({ ...v, [f.key]: e.target.value }))}
+                                        className="w-28 bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-right focus:outline-none focus:border-gold"
+                                    />
+                                    <span className="text-sm text-gray-400 w-14">{f.unit}</span>
+                                </>
+                            )}
                         </div>
                     </div>
                 ))}

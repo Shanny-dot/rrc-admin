@@ -6,7 +6,7 @@ import { api } from '../lib/axios';
 const inputClass = 'w-full bg-input border border-[#333] rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-gold transition-colors';
 
 // Thank everyone who checked in to an event: phone alert, in-app update and (once email is set
-// up) an email with the key points, links and a "Talk to my broker" button.
+// up) an email with the key points, links and a "Contact us" button.
 const ThankYouModal = ({ event, onClose }) => {
     const queryClient = useQueryClient();
     const [message, setMessage] = useState('');
@@ -94,7 +94,7 @@ const ThankYouModal = ({ event, onClose }) => {
                             <input value={extraUrl} onChange={(e) => setExtraUrl(e.target.value)} placeholder="https://" className={inputClass} />
                         </label>
                         <p className="text-xs text-gray-500">
-                            The email includes a "Talk to my broker" button using the contact details on the Help &amp; Contact page.
+                            The email includes a "Contact us" button using the contact details on the Help &amp; Contact page.
                         </p>
                         {error && <p className="text-sm text-red-400">{error}</p>}
                         <div className="flex justify-end gap-3 pt-2">
