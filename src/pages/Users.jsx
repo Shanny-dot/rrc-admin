@@ -230,6 +230,7 @@ const Users = () => {
                                     <th className="px-6 py-4 font-medium">Gender</th>
                                     <th className="px-6 py-4 font-medium">Occupancy</th>
                                     <th className="px-6 py-4 font-medium">Joined</th>
+                                    <th className="px-6 py-4 font-medium">Verified</th>
                                     <th className="px-6 py-4 font-medium">Reward Points</th>
                                     {activeTab === 'deleted' && <th className="px-6 py-4 font-medium">Deleted On</th>}
                                     <th className="px-6 py-4 font-medium">Role</th>
@@ -264,7 +265,17 @@ const Users = () => {
                                         <td className="px-6 py-4 text-gray-400">
                                             {user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'}
                                         </td>
-                                        
+                                        {/* Welcome points are only given once both are verified */}
+                                        <td className="px-6 py-4 text-xs whitespace-nowrap">
+                                            <span className={user.mobile_verified_at ? 'text-green-400' : 'text-red-400'}>
+                                                {user.mobile_verified_at ? '✓' : '✗'} Mobile
+                                            </span>
+                                            <span className="text-gray-600 mx-1.5">·</span>
+                                            <span className={user.email_verified_at ? 'text-green-400' : 'text-red-400'}>
+                                                {user.email_verified_at ? '✓' : '✗'} Email
+                                            </span>
+                                        </td>
+
                                         {/* Points Column with Quick Edit */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
@@ -732,6 +743,8 @@ const Users = () => {
                                         { label: 'Total Points', value: `${viewingUser.total_points || 0} pts` },
                                         { label: 'Referral Code', value: viewingUser.referral_code || '—' },
                                         { label: 'Joined', value: viewingUser.created_at ? new Date(viewingUser.created_at).toLocaleDateString() : '—' },
+                                        { label: 'Mobile verified', value: viewingUser.mobile_verified_at ? new Date(viewingUser.mobile_verified_at).toLocaleDateString() : 'Not yet' },
+                                        { label: 'Email verified', value: viewingUser.email_verified_at ? new Date(viewingUser.email_verified_at).toLocaleDateString() : 'Not yet' },
                                         { label: 'Role', value: viewingUser.is_admin ? 'Admin' : 'Member' },
                                     ].map(({ label, value }) => (
                                         <div key={label} className="bg-input rounded-lg px-3 py-2">
