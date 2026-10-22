@@ -5,9 +5,8 @@ import { api } from '../lib/axios';
 
 // Points rules members see in the app. Numbers are whole numbers; 0 switches that one off.
 const FIELDS = [
-    { key: 'welcome_points', label: 'Welcome points', help: 'Added to every new member\'s account when they sign up (on any day except launch day). 0 = no welcome points.', unit: 'points', fallback: '100' },
-    { key: 'launch_date', label: 'Launch day', help: 'Everyone who signs up on this day (Sydney time) gets the launch day bonus below instead of the welcome points.', type: 'date', fallback: '2026-10-25' },
-    { key: 'launch_bonus_points', label: 'Launch day bonus', help: 'Given instead of the welcome points to people who sign up on launch day. 0 = no launch bonus.', unit: 'points', fallback: '100' },
+    { key: 'welcome_points', label: 'Welcome points', help: 'Added to a new member\'s account once their mobile and email are both verified (members who didn\'t use the launch QR code). 0 = no welcome points.', unit: 'points', fallback: '100' },
+    { key: 'launch_bonus_points', label: 'Launch QR code bonus', help: 'Given instead of the welcome points to people who signed up by scanning the launch QR code (code LAUNCH), once their mobile and email are both verified. 0 = no launch bonus.', unit: 'points', fallback: '100' },
     { key: 'referral_points', label: 'Referral bonus', help: 'Added to the member who referred a friend when you move that referral to "Points added" on the Referrals page.', unit: 'points' },
     { key: 'bonus_birthday_points', label: 'Birthday bonus', help: 'Added on the member\'s birthday, with a "Happy birthday" alert. Needs their date of birth.', unit: 'points' },
     { key: 'points_expiry_months', label: 'Points expire after', help: 'Unused points expire this many months after they were earned. Members get an alert 30 days before. 0 = never expire.', unit: 'months' },
@@ -59,7 +58,7 @@ const ProgramSettings = () => {
             <div className="mb-8 flex items-start justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Program settings</h1>
-                    <p className="text-gray-400 mt-1">Welcome points, the launch day bonus, the referral bonus, the birthday bonus and points expiry. Set any number to 0 to switch it off.</p>
+                    <p className="text-gray-400 mt-1">Welcome points, the launch QR code bonus, the referral bonus, the birthday bonus and points expiry. Set any number to 0 to switch it off.</p>
                 </div>
                 <button
                     onClick={save}
