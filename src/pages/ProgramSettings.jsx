@@ -7,6 +7,7 @@ import { api } from '../lib/axios';
 const FIELDS = [
     { key: 'welcome_points', label: 'Welcome points', help: 'Added to a new member\'s account once their mobile and email are both verified (members who didn\'t use the launch QR code). 0 = no welcome points.', unit: 'points', fallback: '100' },
     { key: 'launch_bonus_points', label: 'Launch QR code bonus', help: 'Given instead of the welcome points to people who signed up by scanning the launch QR code (code LAUNCH), once their mobile and email are both verified. 0 = no launch bonus.', unit: 'points', fallback: '100' },
+    { key: 'min_points_to_redeem', label: 'Minimum balance to redeem', help: 'Members need at least this many points in their account before they can redeem any reward, whatever the reward costs. 0 = no minimum.', unit: 'points', fallback: '150' },
     { key: 'referral_points', label: 'Referral bonus', help: 'Added to the member who referred a friend when you move that referral to "Points added" on the Referrals page.', unit: 'points' },
     { key: 'bonus_birthday_points', label: 'Birthday bonus', help: 'Added on the member\'s birthday, with a "Happy birthday" alert. Needs their date of birth.', unit: 'points' },
     { key: 'points_expiry_months', label: 'Points expire after', help: 'Unused points expire this many months after they were earned. Members get an alert 30 days before. 0 = never expire.', unit: 'months' },
