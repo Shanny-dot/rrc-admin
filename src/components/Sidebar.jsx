@@ -1,11 +1,14 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, Users, Calendar, Gift, CheckCircle, List, LogOut, UserPlus, LifeBuoy, MessageSquare, PhoneCall, SlidersHorizontal } from 'lucide-react';
+import { Home, Users, Calendar, Gift, CheckCircle, List, LogOut, UserPlus, LifeBuoy, MessageSquare, PhoneCall, SlidersHorizontal, ShieldCheck, ScrollText } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useAccess } from '../lib/access';
 
 const Sidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const access = useAccess();
 
+    // `need`: shown only to staff whose access level allows it
     const links = [
         { name: 'Dashboard', path: '/', icon: Home },
         { name: 'Users', path: '/users', icon: Users },
@@ -16,9 +19,11 @@ const Sidebar = () => {
         { name: 'Transactions', path: '/transactions', icon: List },
         { name: 'Requests', path: '/broker-requests', icon: PhoneCall },
         { name: 'Feedback', path: '/feedback', icon: MessageSquare },
-        { name: 'Program settings', path: '/program-settings', icon: SlidersHorizontal },
-        { name: 'Help & Contact', path: '/help-contact', icon: LifeBuoy },
-    ];
+        { name: 'Program settings', path: '/program-settings', icon: SlidersHorizontal, need: 'settings.manage' },
+        { name: 'Help & Contact', path: '/help-contact', icon: LifeBuoy, need: 'settings.manage' },
+        { name: 'Staff & access', path: '/staff', icon: ShieldCheck, need: 'staff.manage' },
+        { name: 'Activity log', path: '/activity', icon: ScrollText, need: 'audit.view' },
+    ].filter((link) => !link.need || access.can(link.need));
 
     return (
         <div className="w-64 bg-surface h-full border-r border-input p-6 flex flex-col">
@@ -48,6 +53,12 @@ const Sidebar = () => {
             </nav>
 
             <div className="mt-8 border-t border-input pt-4">
+                {access.email && (
+                    <div className="px-4 pb-3 text-xs text-gray-500">
+                        <div className="truncate text-gray-300">{access.email}</div>
+                        <div>{(access.roleLabel || '').split(' - ')[0]}</div>
+                    </div>
+                )}
                 <button
                     onClick={async () => {
                         try {

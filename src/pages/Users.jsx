@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Search, Shield, Trash2, Edit3, RotateCcw, AlertTriangle, X, Check, Eye, PlusCircle, MinusCircle } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/axios';
+import { useAccess } from '../lib/access';
 
 // Keep these in step with the app's profile drop-downs (lib/screens/redesign/profile_screen.dart).
 const HOME_OWNERSHIP_OPTIONS = ['Own outright', 'Own with a mortgage', 'Renting/boarding', 'Other'];
@@ -10,6 +11,7 @@ const INCOME_OPTIONS = ['Under $50,000', '$50,000 – $100,000', '$100,000 – $
 
 const Users = () => {
     const queryClient = useQueryClient();
+    const access = useAccess();
     const [activeTab, setActiveTab] = useState('active'); // 'active' or 'deleted'
     const [searchQuery, setSearchQuery] = useState('');
     
@@ -36,7 +38,7 @@ const Users = () => {
         retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 15000),
     });
 
-    // Fetch Deleted Users (Last 30 Days)
+    // Fetch closed accounts (kept so they can be restored at any time)
     const { data: deletedUsers = [], isLoading: isLoadingDeleted, isError: isErrorDeleted, refetch: refetchDeleted } = useQuery({
         queryKey: ['adminDeletedUsers'],
         queryFn: async () => {
@@ -95,6 +97,13 @@ const Users = () => {
             queryClient.invalidateQueries(['adminDeletedUsers']);
             setRestoringUser(null);
         }
+    });
+
+    // Mutation: end every signed-in session of a member (lost phone, suspected break-in)
+    const signOutMutation = useMutation({
+        mutationFn: async (id) => (await api.post(`/api/v1/admin/users/${id}/sign-out-everywhere`)).data,
+        onSuccess: (data) => alert(data.message),
+        onError: (err) => alert(err.response?.data?.detail || err.message),
     });
 
     // Mutation: Save user profile from drawer
@@ -170,7 +179,7 @@ const Users = () => {
                                 : 'text-gray-400 hover:text-white'
                         }`}
                     >
-                        Deleted Users (30 Days) ({deletedUsers.length})
+                        Deleted Users ({deletedUsers.length})
                     </button>
                 </div>
             </div>
@@ -280,7 +289,7 @@ const Users = () => {
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gold font-bold text-base">{user.total_points || 0} pts</span>
-                                                {activeTab === 'active' && (
+                                                {activeTab === 'active' && access.can('points.adjust') && (
                                                     <button
                                                         onClick={() => openEditPoints(user)}
                                                         title="Edit Reward Points"
@@ -321,13 +330,15 @@ const Users = () => {
                                                     >
                                                         <Eye size={16} />
                                                     </button>
-                                                    <button
-                                                        onClick={() => openEditPoints(user)}
-                                                        className="px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-gold text-xs font-semibold rounded-lg transition-colors border border-gold/30"
-                                                    >
-                                                        Edit Points
-                                                    </button>
-                                                    {!user.is_admin && (
+                                                    {access.can('points.adjust') && (
+                                                        <button
+                                                            onClick={() => openEditPoints(user)}
+                                                            className="px-3 py-1.5 bg-gold/10 hover:bg-gold/20 text-gold text-xs font-semibold rounded-lg transition-colors border border-gold/30"
+                                                        >
+                                                            Edit Points
+                                                        </button>
+                                                    )}
+                                                    {!user.is_admin && access.can('members.delete') && (
                                                         <button
                                                             onClick={() => setDeletingUser(user)}
                                                             className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
@@ -337,7 +348,7 @@ const Users = () => {
                                                         </button>
                                                     )}
                                                 </div>
-                                            ) : (
+                                            ) : access.can('members.delete') && (
                                                 <button
                                                     onClick={() => setRestoringUser(user)}
                                                     className="px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-400 text-xs font-semibold rounded-lg transition-colors border border-green-500/30 flex items-center gap-1 ml-auto"
@@ -532,7 +543,7 @@ const Users = () => {
                             Are you sure you want to delete <strong className="text-white">{deletingUser.full_name}</strong> ({deletingUser.email})?
                         </p>
                         <p className="text-xs text-gray-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg mb-6">
-                            ℹ️ The account will be moved to the <strong>Deleted Users (30 Days)</strong> section. You can restore it anytime within 30 days.
+                            ℹ️ The account will be moved to the <strong>Deleted Users</strong> section. Nothing is erased, and you can restore it at any time.
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
@@ -766,6 +777,16 @@ const Users = () => {
                             )}
                             {!saveProfileMutation.isError && !(saveProfileMutation.isSuccess && !drawerDirty) && <span />}
                             <div className="flex gap-3">
+                                {access.can('members.security') && (
+                                    <button
+                                        onClick={() => window.confirm(`Sign ${viewingUser.full_name || 'this member'} out of the app on every phone? They'll need to sign in again (use this for a lost phone or a suspected break-in).`)
+                                            && signOutMutation.mutate(viewingUser.id)}
+                                        disabled={signOutMutation.isPending}
+                                        className="px-4 py-2 rounded-lg bg-input hover:bg-[#333] text-red-300 text-sm font-medium transition-colors disabled:opacity-40"
+                                    >
+                                        {signOutMutation.isPending ? 'Signing out...' : 'Sign out of all devices'}
+                                    </button>
+                                )}
                                 <button
                                     onClick={() => setViewingUser(null)}
                                     className="px-4 py-2 rounded-lg bg-input hover:bg-[#333] text-gray-300 text-sm font-medium transition-colors"
