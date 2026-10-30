@@ -2,6 +2,8 @@
   RewriteEngine On
   RewriteBase /
   # Staff passwords must never travel over plain http
+  # (certificate renewals check /.well-known over http)
+  RewriteCond %{REQUEST_URI} !^/\.well-known/
   RewriteCond %{HTTPS} !=on
   RewriteCond %{HTTP:X-Forwarded-Proto} !=https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
