@@ -17,7 +17,6 @@ import Download from './pages/Download';
 import Faq from './pages/Faq';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
-import TwoStep from './pages/TwoStep';
 import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -32,10 +31,8 @@ if (typeof window !== 'undefined' && window.location.pathname !== '/reset-passwo
   }
 }
 
-// Admin pages need the password AND the authenticator-app code (session level 'aal2').
-const ProtectedRoute = ({ children, session, twoStepDone }) => {
+const ProtectedRoute = ({ children, session }) => {
   if (!session) return <Navigate to="/login" replace />;
-  if (!twoStepDone) return <Navigate to="/two-step" replace />;
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
@@ -48,30 +45,18 @@ const ProtectedRoute = ({ children, session, twoStepDone }) => {
 
 function App() {
   const [session, setSession] = useState(null);
-  const [twoStepDone, setTwoStepDone] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const update = async (session) => {
-      let done = false;
-      if (session) {
-        const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        done = data?.currentLevel === 'aal2';
-      }
-      setTwoStepDone(done);
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-    };
-
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      await update(session);
       setLoading(false);
     });
 
-    // Supabase calls this inside its own lock; the level check runs just after it.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setTimeout(() => update(session), 0);
+      setSession(session);
     });
 
     return () => subscription.unsubscribe();
@@ -83,7 +68,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
-        <Route path="/two-step" element={!session ? <Navigate to="/login" replace /> : twoStepDone ? <Navigate to="/" replace /> : <TwoStep />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/support" element={<Support />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
@@ -92,17 +76,17 @@ function App() {
         <Route path="/download" element={<Download />} />
         <Route path="/faq" element={<Faq />} />
 
-        <Route path="/" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Dashboard /></ProtectedRoute>} />
-        <Route path="/users" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Users /></ProtectedRoute>} />
-        <Route path="/events" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Events /></ProtectedRoute>} />
-        <Route path="/rewards" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Rewards /></ProtectedRoute>} />
-        <Route path="/redemptions" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Redemptions /></ProtectedRoute>} />
-        <Route path="/transactions" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Transactions /></ProtectedRoute>} />
-        <Route path="/referrals" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Referrals /></ProtectedRoute>} />
-        <Route path="/help-contact" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><HelpContact /></ProtectedRoute>} />
-        <Route path="/feedback" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Feedback /></ProtectedRoute>} />
-        <Route path="/broker-requests" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><BrokerRequests /></ProtectedRoute>} />
-        <Route path="/program-settings" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><ProgramSettings /></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute session={session}><Dashboard /></ProtectedRoute>} />
+        <Route path="/users" element={<ProtectedRoute session={session}><Users /></ProtectedRoute>} />
+        <Route path="/events" element={<ProtectedRoute session={session}><Events /></ProtectedRoute>} />
+        <Route path="/rewards" element={<ProtectedRoute session={session}><Rewards /></ProtectedRoute>} />
+        <Route path="/redemptions" element={<ProtectedRoute session={session}><Redemptions /></ProtectedRoute>} />
+        <Route path="/transactions" element={<ProtectedRoute session={session}><Transactions /></ProtectedRoute>} />
+        <Route path="/referrals" element={<ProtectedRoute session={session}><Referrals /></ProtectedRoute>} />
+        <Route path="/help-contact" element={<ProtectedRoute session={session}><HelpContact /></ProtectedRoute>} />
+        <Route path="/feedback" element={<ProtectedRoute session={session}><Feedback /></ProtectedRoute>} />
+        <Route path="/broker-requests" element={<ProtectedRoute session={session}><BrokerRequests /></ProtectedRoute>} />
+        <Route path="/program-settings" element={<ProtectedRoute session={session}><ProgramSettings /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

@@ -14,13 +14,3 @@ api.interceptors.request.use(async (config) => {
 }, (error) => {
     return Promise.reject(error);
 });
-
-// The server refuses admin requests until the authenticator-app code has been entered.
-api.interceptors.response.use((response) => response, (error) => {
-    const detail = error?.response?.data?.detail;
-    if (error?.response?.status === 403 && typeof detail === 'string' && detail.startsWith('two_step_required')
-        && window.location.pathname !== '/two-step') {
-        window.location.href = '/two-step';
-    }
-    return Promise.reject(error);
-});
