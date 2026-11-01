@@ -10,7 +10,7 @@ const API = import.meta.env.VITE_API_URL || 'https://rrc-backend-1dmv.onrender.c
 const LAUNCH_CODE = 'LAUNCH';
 const withReferrer = (url) => `${url}${url.includes('?') ? '&' : '?'}referrer=${encodeURIComponent(`rrc_code=${LAUNCH_CODE}`)}`;
 const DEFAULT_STORES = {
-    ios: 'https://apps.apple.com/au/app/reliance-rewards/id6784309292',
+    ios: 'https://apps.apple.com/au/app/reliiance-rewards/id6784309292',
     android: 'https://play.google.com/store/apps/details?id=com.rrc.app',
 };
 

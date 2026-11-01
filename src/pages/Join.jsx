@@ -20,7 +20,7 @@ const Join = () => {
     const code = rawCode.trim().toUpperCase();
     const [invite, setInvite] = useState(null);
     const [stores, setStores] = useState({
-        ios: 'https://apps.apple.com/au/app/reliance-rewards/id6784309292',
+        ios: 'https://apps.apple.com/au/app/reliiance-rewards/id6784309292',
         android: 'https://play.google.com/store/apps/details?id=com.rrc.app',
     });
     const [copied, setCopied] = useState(false);

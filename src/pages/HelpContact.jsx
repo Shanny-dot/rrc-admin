@@ -8,7 +8,7 @@ const CONTACT_FIELDS = [
     { key: 'contact_card_title', label: 'Card title on Home', placeholder: 'Contact us' },
     { key: 'contact_name', label: 'Name under the title', placeholder: 'The Reliiance team' },
     { key: 'contact_phone', label: 'Phone number', placeholder: '02 9000 0000' },
-    { key: 'contact_email', label: 'Email address', placeholder: 'hello@reliance.com.au' },
+    { key: 'contact_email', label: 'Email address', placeholder: 'hello@reliiance.com.au' },
     { key: 'contact_booking_url', label: 'Book-a-time link', placeholder: 'https://calendly.com/...' },
     { key: 'contact_hours', label: 'Opening hours', placeholder: 'Mon–Fri, 9am–5pm' },
 ];
