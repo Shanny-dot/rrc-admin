@@ -18,6 +18,8 @@ import Faq from './pages/Faq';
 import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import TwoStep from './pages/TwoStep';
+import Staff from './pages/Staff';
+import ActivityLog from './pages/ActivityLog';
 import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
@@ -103,6 +105,8 @@ function App() {
         <Route path="/feedback" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Feedback /></ProtectedRoute>} />
         <Route path="/broker-requests" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><BrokerRequests /></ProtectedRoute>} />
         <Route path="/program-settings" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><ProgramSettings /></ProtectedRoute>} />
+        <Route path="/staff" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><Staff /></ProtectedRoute>} />
+        <Route path="/activity" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><ActivityLog /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

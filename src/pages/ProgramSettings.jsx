@@ -14,6 +14,62 @@ const FIELDS = [
 ];
 const isValid = (f, v) => (f.type === 'date' ? /^\d{4}-\d{2}-\d{2}$/.test(v) : /^\d+$/.test(v));
 
+// Security alerts (staff-only settings, so they come from the admin content list, not the public one)
+const SecurityAlerts = () => {
+    const [email, setEmail] = useState('');
+    const [points, setPoints] = useState('1000');
+    const [saved, setSaved] = useState(null);
+    const { data: rows } = useQuery({
+        queryKey: ['adminContentAll'],
+        queryFn: async () => (await api.get('/api/v1/content/all')).data,
+    });
+    useEffect(() => {
+        const get = (k) => (rows || []).find((r) => r.key === k)?.value;
+        if (rows) {
+            setEmail(get('security_alert_email') || '');
+            setPoints(get('security_alert_points') || '1000');
+        }
+    }, [rows]);
+
+    const save = async () => {
+        if (!/^\d+$/.test(points.trim()) || parseInt(points, 10) < 1) {
+            setSaved({ error: true, text: 'The points amount must be a whole number above 0.' });
+            return;
+        }
+        try {
+            await api.put('/api/v1/content/security_alert_email', { value: email.trim() });
+            await api.put('/api/v1/content/security_alert_points', { value: String(parseInt(points, 10)) });
+            setSaved({ error: false, text: 'Saved.' });
+        } catch (err) {
+            setSaved({ error: true, text: err.response?.data?.detail || err.message });
+        }
+    };
+
+    return (
+        <div className="bg-surface rounded-2xl border border-input p-5 mt-8">
+            <div className="text-white font-medium">Security alerts</div>
+            <div className="text-sm text-gray-400 mt-0.5 mb-4">
+                Emails about repeated wrong passwords, large points changes and changes to staff access. Leave the
+                address empty to use the usual staff email (membership@).
+            </div>
+            <div className="flex flex-wrap gap-4 items-end">
+                <label className="flex flex-col gap-1 text-xs text-gray-400">
+                    Send alerts to
+                    <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="membership@reliiancerewards.com.au"
+                        className="w-72 bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-gold" />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-gray-400">
+                    Alert when one points change is at least
+                    <input inputMode="numeric" value={points} onChange={(e) => setPoints(e.target.value)}
+                        className="w-28 bg-input border border-[#333] rounded-lg px-3 py-2 text-white text-right text-sm focus:outline-none focus:border-gold" />
+                </label>
+                <button onClick={save} className="bg-gold hover:bg-gold-light text-black font-semibold px-4 py-2 rounded-lg text-sm">Save alerts</button>
+            </div>
+            {saved && <div className={`mt-3 text-sm ${saved.error ? 'text-red-400' : 'text-green-400'}`}>{saved.text}</div>}
+        </div>
+    );
+};
+
 const ProgramSettings = () => {
     const queryClient = useQueryClient();
     const [values, setValues] = useState({});
@@ -106,6 +162,8 @@ const ProgramSettings = () => {
                     </div>
                 ))}
             </div>
+
+            <SecurityAlerts />
         </div>
     );
 };
