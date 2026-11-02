@@ -41,7 +41,7 @@ export default function DemoGate({ children }) {
 
     return (
         <>
-            <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none max-w-[92vw] text-center px-4 py-1 rounded-full bg-amber-500 text-black text-xs font-bold shadow-lg">
+            <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none max-w-[92vw] text-center px-4 py-1 rounded-full bg-amber-500 text-black text-xs font-bold shadow-lg">
                 STAGING / DEMO · Not the live admin panel · Sample data only
             </div>
             {unlocked ? children : (
