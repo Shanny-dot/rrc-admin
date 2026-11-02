@@ -8,7 +8,9 @@ export function useAccess() {
         queryKey: ['adminMe'],
         queryFn: async () => (await api.get('/api/v1/admin/me')).data,
         staleTime: 5 * 60 * 1000,
-        retry: false,
+        // A server that's waking up gives no answer: keep trying, so the menu isn't left incomplete.
+        retry: (count, err) => !err?.response && count < 5,
+        retryDelay: 5000,
     });
     const permissions = new Set(data?.permissions || []);
     return {

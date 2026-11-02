@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { IS_DEMO, DEMO_CODE_HASH, isPublicPage } from '../lib/demo';
+import { useEffect, useState } from 'react';
+import { IS_DEMO, DEMO_API_URL, DEMO_CODE_HASH, isPublicPage } from '../lib/demo';
 
 const UNLOCKED = 'rrc-demo-unlocked';
 
@@ -22,8 +22,31 @@ export default function DemoGate({ children }) {
     const [unlocked, setUnlocked] = useState(wasUnlocked);
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
+    const applies = IS_DEMO && !isPublicPage(window.location.pathname);
+    const [awake, setAwake] = useState(false);
 
-    if (!IS_DEMO || isPublicPage(window.location.pathname)) return children;
+    // The free test server sleeps when idle and takes about a minute to wake. Wait for it, or the
+    // new screens and menu items look missing and the dashboard shows zeros.
+    useEffect(() => {
+        if (!applies || !unlocked || awake) return undefined;
+        let stopped = false;
+        const check = async () => {
+            try {
+                const r = await fetch(`${DEMO_API_URL}/health/db`);
+                if (r.ok) {
+                    if (!stopped) setAwake(true);
+                    return;
+                }
+            } catch {
+                // Still waking; try again below.
+            }
+            if (!stopped) setTimeout(check, 3000);
+        };
+        check();
+        return () => { stopped = true; };
+    }, [applies, unlocked, awake]);
+
+    if (!applies) return children;
 
     const submit = async (e) => {
         e.preventDefault();
@@ -44,7 +67,16 @@ export default function DemoGate({ children }) {
             <div className="fixed bottom-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none max-w-[92vw] text-center px-4 py-1 rounded-full bg-amber-500 text-black text-xs font-bold shadow-lg">
                 STAGING / DEMO · Not the live admin panel · Sample data only
             </div>
-            {unlocked ? children : (
+            {unlocked && !awake && (
+                <div className="min-h-screen flex items-center justify-center bg-bg-base px-4 text-center">
+                    <div>
+                        <h1 className="text-xl font-bold text-white mb-2">Starting the demo server...</h1>
+                        <p className="text-sm text-gray-400">This can take about a minute. The page will open by itself.</p>
+                    </div>
+                </div>
+            )}
+            {unlocked && awake && children}
+            {!unlocked && (
                 <div className="min-h-screen flex items-center justify-center bg-bg-base px-4">
                     <form onSubmit={submit} className="w-full max-w-md p-8 bg-surface rounded-2xl border border-input shadow-2xl">
                         <h1 className="text-xl font-bold text-white mb-2">Staging / demo access</h1>
