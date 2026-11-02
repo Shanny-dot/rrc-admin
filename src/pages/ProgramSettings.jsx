@@ -15,6 +15,43 @@ const FIELDS = [
 const isValid = (f, v) => (f.type === 'date' ? /^\d{4}-\d{2}-\d{2}$/.test(v) : /^\d+$/.test(v));
 
 // Security alerts (staff-only settings, so they come from the admin content list, not the public one)
+const EventCheckIn = () => {
+    const [selfCheckIn, setSelfCheckIn] = useState(true);
+    const [saved, setSaved] = useState(null);
+    const { data: rows } = useQuery({
+        queryKey: ['adminContentAll'],
+        queryFn: async () => (await api.get('/api/v1/content/all')).data,
+    });
+    useEffect(() => {
+        if (rows) setSelfCheckIn(rows.find((r) => r.key === 'event_self_checkin')?.value !== '0');
+    }, [rows]);
+
+    const change = async (allow) => {
+        setSelfCheckIn(allow);
+        try {
+            await api.put('/api/v1/content/event_self_checkin', { value: allow ? '1' : '0' });
+            setSaved({ error: false, text: 'Saved.' });
+        } catch (err) {
+            setSaved({ error: true, text: err.response?.data?.detail || err.message });
+        }
+    };
+
+    return (
+        <div className="bg-surface rounded-2xl border border-input p-5 mt-8">
+            <div className="text-white font-medium">Event check-in</div>
+            <div className="text-sm text-gray-400 mt-0.5 mb-4">
+                With staff check-in only, members can't claim event points themselves, so points go only to people
+                who attended. Staff check members in from Events, using the attendees button.
+            </div>
+            <label className="flex items-center gap-2 text-sm text-gray-300">
+                <input type="checkbox" checked={!selfCheckIn} onChange={(e) => change(!e.target.checked)} />
+                Staff check-in only
+            </label>
+            {saved && <div className={`mt-3 text-sm ${saved.error ? 'text-red-400' : 'text-green-400'}`}>{saved.text}</div>}
+        </div>
+    );
+};
+
 const SecurityAlerts = () => {
     const [email, setEmail] = useState('');
     const [points, setPoints] = useState('1000');
@@ -164,6 +201,7 @@ const ProgramSettings = () => {
             </div>
 
             <SecurityAlerts />
+            <EventCheckIn />
         </div>
     );
 };

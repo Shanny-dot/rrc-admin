@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QRCodeSVG } from 'qrcode.react';
 import { api } from '../lib/axios';
 import ThankYouModal from '../components/ThankYouModal';
+import EventAttendees from '../components/EventAttendees';
 import { uploadImage } from '../lib/uploadImage';
 
 // "50" or "50–100" when an "up to" amount is set.
@@ -28,6 +29,7 @@ const EMPTY_FORM = {
 const Events = () => {
     const queryClient = useQueryClient();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [attendeesEvent, setAttendeesEvent] = useState(null);
     const [editingEvent, setEditingEvent] = useState(null);
     const [qrEvent, setQrEvent] = useState(null);
     const [thanksEvent, setThanksEvent] = useState(null);
@@ -237,6 +239,13 @@ const Events = () => {
                                                         <Heart size={18} />
                                                     </button>
                                                 )}
+                                                <button
+                                                    onClick={() => setAttendeesEvent(event)}
+                                                    className="text-gray-400 hover:text-gold transition-colors"
+                                                    title="Attendees and check-in"
+                                                >
+                                                    <Users size={18} />
+                                                </button>
                                                 <button
                                                     onClick={() => setQrEvent(event)}
                                                     className="text-gray-400 hover:text-gold transition-colors"
@@ -485,6 +494,7 @@ const Events = () => {
             )}
             {thanksEvent && <ThankYouModal event={thanksEvent} onClose={() => setThanksEvent(null)} />}
             {/* QR Code Modal */}
+            {attendeesEvent && <EventAttendees event={attendeesEvent} onClose={() => setAttendeesEvent(null)} />}
             {qrEvent && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
                     <div className="bg-surface border border-input rounded-2xl w-full max-w-sm overflow-hidden text-center shadow-2xl">
