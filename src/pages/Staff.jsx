@@ -136,7 +136,7 @@ const Staff = () => {
                                             )}
                                         </td>
                                         <td className="p-4">
-                                            {s.two_step === true && <span className="flex items-center gap-1.5 text-emerald-400"><ShieldCheck size={16} /> Set up</span>}
+                                            {s.two_step === true && <span className="flex items-center gap-1.5 text-emerald-400"><ShieldCheck size={16} /> On</span>}
                                             {s.two_step === false && <span className="flex items-center gap-1.5 text-amber-400"><ShieldAlert size={16} /> Not yet (asked at next sign-in)</span>}
                                             {s.two_step == null && <span className="text-gray-500">Unknown</span>}
                                         </td>
