@@ -17,8 +17,15 @@ api.interceptors.request.use(async (config) => {
 });
 
 // The server refuses admin requests until the authenticator-app code has been entered.
-api.interceptors.response.use((response) => response, (error) => {
+api.interceptors.response.use((response) => response, async (error) => {
     const detail = error?.response?.data?.detail;
+    // The session has ended on the server (signed out everywhere, access removed, reset): without
+    // this the site stays open with empty pages and a short menu instead of asking to sign in.
+    if (error?.response?.status === 401 && window.location.pathname !== '/login') {
+        await supabase.auth.signOut({ scope: 'local' });
+        window.location.href = '/login';
+        return Promise.reject(error);
+    }
     if (error?.response?.status === 403 && typeof detail === 'string' && detail.startsWith('two_step_required')
         && window.location.pathname !== '/two-step') {
         window.location.href = '/two-step';
