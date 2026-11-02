@@ -24,6 +24,7 @@ import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Sidebar from './components/Sidebar';
+import DemoGate from './components/DemoGate';
 
 // A password-reset email link can land on any page of this site (Supabase falls back to
 // the Site URL). Send it to the "Set a new password" page, keeping the link's token.
@@ -82,6 +83,7 @@ function App() {
   if (loading) return <div className="h-screen flex items-center justify-center text-white">Loading...</div>;
 
   return (
+    <DemoGate>
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/" /> : <Login />} />
@@ -109,6 +111,7 @@ function App() {
         <Route path="/activity" element={<ProtectedRoute session={session} twoStepDone={twoStepDone}><ActivityLog /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
+    </DemoGate>
   );
 }
 

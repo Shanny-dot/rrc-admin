@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { supabase } from './supabase';
+import { IS_DEMO, DEMO_API_URL } from './demo';
 
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'https://rrc-backend-1dmv.onrender.com',
+    baseURL: IS_DEMO ? DEMO_API_URL : import.meta.env.VITE_API_URL || 'https://rrc-backend-1dmv.onrender.com',
 });
 
 api.interceptors.request.use(async (config) => {
